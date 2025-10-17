@@ -21,6 +21,15 @@ export interface Message {
   content: string
   imageUrl?: string
   createdAt: Date
+  editedAt?: Date
+  isEdited?: boolean
+}
+
+export interface MessageEdit {
+  id: string
+  messageId: string
+  previousContent: string
+  editedAt: Date
 }
 
 export interface CreateChatRequest {
@@ -45,4 +54,6 @@ export interface MessageResponse {
   content: string
   imageUrl?: string
   createdAt: string
+  editedAt?: string
+  isEdited?: boolean
 }

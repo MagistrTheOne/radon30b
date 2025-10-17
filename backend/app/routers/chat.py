@@ -7,7 +7,7 @@ from app.models.user import User
 from app.models.chat import Chat
 from app.models.message import Message, MessageRole
 from app.schemas.chat import ChatCreate, ChatResponse, ChatUpdate
-from app.schemas.message import MessageCreate, MessageResponse
+from app.schemas.message import MessageCreate, MessageResponse, MessageUpdate
 from app.services.ai_service import AIService
 from typing import List
 import json
@@ -104,7 +104,9 @@ async def get_chat(
             role=msg.role,
             content=msg.content,
             image_url=msg.image_url,
-            created_at=msg.created_at
+            created_at=msg.created_at,
+            edited_at=msg.edited_at,
+            is_edited=msg.is_edited
         )
         for msg in chat.messages
     ]
@@ -232,7 +234,9 @@ async def send_message(
         role=ai_message.role,
         content=ai_message.content,
         image_url=ai_message.image_url,
-        created_at=ai_message.created_at
+        created_at=ai_message.created_at,
+        edited_at=ai_message.edited_at,
+        is_edited=ai_message.is_edited
     )
 
 @router.post("/chats/{chat_id}/stream")
@@ -304,3 +308,107 @@ async def stream_message(
             "Connection": "keep-alive",
         }
     )
+
+@router.put("/chats/{chat_id}/messages/{message_id}", response_model=MessageResponse)
+async def edit_message(
+    chat_id: str,
+    message_id: str,
+    message_data: MessageUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Edit a message"""
+    # Verify chat exists and belongs to user
+    chat = db.query(Chat).filter(
+        Chat.id == chat_id,
+        Chat.user_id == current_user.id
+    ).first()
+    
+    if not chat:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chat not found"
+        )
+    
+    # Find the message
+    message = db.query(Message).filter(
+        Message.id == message_id,
+        Message.chat_id == chat_id
+    ).first()
+    
+    if not message:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found"
+        )
+    
+    # Only allow editing user messages
+    if message.role != MessageRole.USER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only edit user messages"
+        )
+    
+    # TODO: Save edit history
+    # For now, just update the content
+    message.content = message_data.content
+    message.edited_at = datetime.utcnow()
+    message.is_edited = True
+    
+    db.commit()
+    db.refresh(message)
+    
+    return MessageResponse(
+        id=message.id,
+        chat_id=message.chat_id,
+        role=message.role,
+        content=message.content,
+        image_url=message.image_url,
+        created_at=message.created_at,
+        edited_at=message.edited_at,
+        is_edited=message.is_edited
+    )
+
+@router.delete("/chats/{chat_id}/messages/{message_id}")
+async def delete_message(
+    chat_id: str,
+    message_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a message"""
+    # Verify chat exists and belongs to user
+    chat = db.query(Chat).filter(
+        Chat.id == chat_id,
+        Chat.user_id == current_user.id
+    ).first()
+    
+    if not chat:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chat not found"
+        )
+    
+    # Find the message
+    message = db.query(Message).filter(
+        Message.id == message_id,
+        Message.chat_id == chat_id
+    ).first()
+    
+    if not message:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found"
+        )
+    
+    # Only allow deleting user messages
+    if message.role != MessageRole.USER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only delete user messages"
+        )
+    
+    db.delete(message)
+    db.commit()
+    
+    return {"message": "Message deleted successfully"}

@@ -1,17 +1,21 @@
 "use client"
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Message } from '@/types/chat'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Copy, RotateCcw, User, Bot } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { Copy, RotateCcw, User, Bot, Edit3, Trash2, Save, X, History } from 'lucide-react'
 import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useTheme } from 'next-themes'
+import { useChatContext } from '@/contexts/ChatContext'
+import { MessageHistoryDialog } from './message-history-dialog'
+import { MessageListSkeleton, LoadingIndicator } from '@/components/loading-states'
 
 interface MessageListProps {
   messages: Message[]
@@ -21,6 +25,12 @@ interface MessageListProps {
 export function MessageList({ messages, isLoading }: MessageListProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
+  const { editMessage, deleteMessage } = useChatContext()
+  
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages arrive
@@ -31,6 +41,33 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       }
     }
   }, [messages, isLoading])
+
+  const startEdit = (message: Message) => {
+    setEditingMessageId(message.id)
+    setEditContent(message.content)
+  }
+
+  const cancelEdit = () => {
+    setEditingMessageId(null)
+    setEditContent('')
+  }
+
+  const saveEdit = async () => {
+    if (editingMessageId && editContent.trim()) {
+      await editMessage(editingMessageId, editContent.trim())
+      setEditingMessageId(null)
+      setEditContent('')
+    }
+  }
+
+  const handleDeleteMessage = async (messageId: string) => {
+    await deleteMessage(messageId)
+  }
+
+  const showHistory = (message: Message) => {
+    setSelectedMessage(message)
+    setHistoryDialogOpen(true)
+  }
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -130,31 +167,91 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                     </div>
                   )}
                   
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    {formatMessageContent(message.content)}
-                  </div>
+                  {editingMessageId === message.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="min-h-[100px] resize-none"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={saveEdit}>
+                          <Save className="w-3 h-3 mr-1" />
+                          Сохранить
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={cancelEdit}>
+                          <X className="w-3 h-3 mr-1" />
+                          Отмена
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      {formatMessageContent(message.content)}
+                      {message.isEdited && (
+                        <div className="text-xs text-muted-foreground mt-2 italic">
+                          (отредактировано)
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {message.role === 'assistant' && (
-                  <div className="flex gap-2 mt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(message.content)}
-                      className="h-8 px-2"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => regenerateResponse(message.id)}
-                      className="h-8 px-2"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
+                {/* Action buttons */}
+                <div className="flex gap-2 mt-2">
+                  {message.role === 'user' && editingMessageId !== message.id && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEdit(message)}
+                        className="h-8 px-2"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteMessage(message.id)}
+                        className="h-8 px-2 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                      {message.isEdited && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => showHistory(message)}
+                          className="h-8 px-2"
+                        >
+                          <History className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  {message.role === 'assistant' && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(message.content)}
+                        className="h-8 px-2"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => regenerateResponse(message.id)}
+                        className="h-8 px-2"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))
@@ -169,19 +266,19 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
             </Avatar>
             <div className="flex-1">
               <div className="bg-muted p-4 rounded-2xl">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Radon AI печатает...</span>
-                </div>
+                <LoadingIndicator text="Radon AI печатает..." />
               </div>
             </div>
           </div>
         )}
       </div>
+      
+      {/* Message History Dialog */}
+      <MessageHistoryDialog
+        open={historyDialogOpen}
+        onOpenChange={setHistoryDialogOpen}
+        message={selectedMessage}
+      />
     </ScrollArea>
   )
 }
