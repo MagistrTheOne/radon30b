@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Simple dark background with subtle pattern */}
       <div className="absolute inset-0 bg-background">
         <div className="absolute inset-0 opacity-10">
@@ -22,16 +22,7 @@ export function Hero() {
           transition={{ duration: 0.8 }}
           className="space-y-8"
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">Российская разработка</span>
-          </motion.div>
+ 
 
           {/* Main heading */}
           <motion.h1

@@ -8,7 +8,7 @@ const stats = [
   { icon: Code, value: "30B", label: "Параметров модели" },
   { icon: Users, value: "1", label: "Разработчик" },
   { icon: MapPin, value: "Краснодар", label: "Местоположение" },
-  { icon: Zap, value: "2024", label: "Год создания" }
+  { icon: Zap, value: "2025", label: "Год создания" }
 ]
 
 const techStack = [
@@ -18,7 +18,7 @@ const techStack = [
 
 export function About() {
   return (
-    <section className="py-24 bg-muted/30">
+    <section id="about" className="py-24 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

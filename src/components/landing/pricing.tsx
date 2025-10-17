@@ -77,7 +77,7 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section className="py-24">
+    <section id="pricing" className="py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -112,16 +112,14 @@ export function Pricing() {
                 </div>
               )}
               
-              <Card className={`h-full relative overflow-hidden ${
+              <Card className={`h-full relative overflow-hidden bg-card/80 backdrop-blur-md ${
                 plan.popular 
                   ? 'border-primary shadow-lg scale-105' 
                   : 'border-border hover:border-primary/50'
               } transition-all duration-300`}>
-                {plan.popular && (
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
-                )}
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                 
-                <CardHeader className="text-center pb-8">
+                <CardHeader className="text-center pb-8 relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <plan.icon className="w-6 h-6 text-primary" />
                   </div>
@@ -139,7 +137,7 @@ export function Pricing() {
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 relative z-10">
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
@@ -163,7 +161,7 @@ export function Pricing() {
                   )}
                 </CardContent>
                 
-                <CardFooter>
+                <CardFooter className="relative z-10">
                   <Button 
                     asChild 
                     className={`w-full ${

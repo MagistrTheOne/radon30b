@@ -12,7 +12,9 @@ import {
   MoreHorizontal,
   Calendar,
   Crown,
-  Zap
+  Zap,
+  Settings,
+  LogOut
 } from 'lucide-react'
 import { 
   DropdownMenu, 
@@ -20,11 +22,13 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { useUser } from '@clerk/nextjs'
+import { useUser, UserButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { ChatResponse } from '@/types/chat'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 
 interface ChatSidebarProps {
   onClose?: () => void
@@ -33,7 +37,7 @@ interface ChatSidebarProps {
 export function ChatSidebar({ onClose }: ChatSidebarProps) {
   const [chats, setChats] = useState<ChatResponse[]>([])
   const [loading, setLoading] = useState(true)
-  const { user: _user } = useUser()
+  const { user } = useUser()
   const router = useRouter()
 
   useEffect(() => {
@@ -242,6 +246,66 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
           )}
         </div>
       </ScrollArea>
+
+      {/* User Section */}
+      <div className="p-4 border-t border-sidebar-border bg-sidebar/50 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={user?.imageUrl} />
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+              {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0) || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">
+              {user?.firstName && user?.lastName 
+                ? `${user.firstName} ${user.lastName}`
+                : user?.emailAddresses[0]?.emailAddress || 'Пользователь'
+              }
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.emailAddresses[0]?.emailAddress}
+            </p>
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem>
+                <Settings className="w-4 h-4 mr-2" />
+                Настройки
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Crown className="w-4 h-4 mr-2" />
+                Управление подпиской
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-6 h-6"
+                    }
+                  }}
+                />
+                <span className="ml-2">Профиль</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive">
+                <LogOut className="w-4 h-4 mr-2" />
+                Выйти
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
     </div>
   )
 }
