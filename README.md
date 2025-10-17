@@ -216,9 +216,8 @@ GitHub: [ваш-github]
 
 ## 🤝 Поддержка
 
-- 📧 Email: support@radonai.com
-- 💬 Discord: [ссылка на сервер]
-- 📖 Документация: [ссылка на docs]
+- 📧 Email: maxonyushko71@gmail.com
+
 
 ---
 
