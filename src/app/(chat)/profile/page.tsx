@@ -34,13 +34,34 @@ export default function ProfilePage() {
     bio: 'Пользователь Radon AI',
     location: 'Краснодар, Россия',
     website: '',
-    timezone: 'Europe/Moscow'
+    timezone: 'Europe/Moscow',
+    avatar: user?.imageUrl || ''
   })
 
-  const handleSave = () => {
-    // TODO: Implement actual save functionality
-    toast.success('Профиль обновлен')
-    setIsEditing(false)
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: profileData.firstName + (profileData.lastName ? ` ${profileData.lastName}` : ''),
+          imageUrl: profileData.avatar
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка сохранения профиля')
+      }
+
+      toast.success('Профиль обновлен')
+      setIsEditing(false)
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка сохранения профиля')
+    }
   }
 
   const handleCancel = () => {
@@ -52,14 +73,37 @@ export default function ProfilePage() {
       bio: 'Пользователь Radon AI',
       location: 'Краснодар, Россия',
       website: '',
-      timezone: 'Europe/Moscow'
+      timezone: 'Europe/Moscow',
+      avatar: user?.imageUrl || ''
     })
     setIsEditing(false)
   }
 
-  const handleDeleteAccount = () => {
-    // TODO: Implement account deletion
-    toast.error('Удаление аккаунта будет реализовано в будущем')
+  const handleDeleteAccount = async () => {
+    if (!confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка удаления аккаунта')
+      }
+
+      toast.success('Аккаунт удален')
+      // Перенаправляем на главную страницу
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка удаления аккаунта')
+    }
   }
 
   return (

@@ -137,11 +137,8 @@ export async function callRadonAPI(
   } catch (error) {
     console.error('Radon API call failed:', error)
     
-    // Fallback response для разработки
-    return {
-      response: `Это демо-ответ от Radon AI 30B параметров (API v2.0.0). Вы написали: "${prompt}". В реальной версии здесь будет интеллектуальный ответ, сгенерированный российской мультимодальной нейросетью с поддержкой function calling и персонализированных режимов общения.`,
-      error: error instanceof Error ? error.message : 'Неизвестная ошибка'
-    }
+    // Возвращаем ошибку вместо мокового ответа
+    throw new Error(`Ошибка обращения к Radon AI: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`)
   }
 }
 
@@ -326,26 +323,14 @@ export async function streamRadonAPI(
   } catch (error) {
     console.error('Radon API streaming failed:', error)
     
-    // Fallback - возвращаем моковый стрим
+    // Возвращаем ошибку вместо мокового ответа
     return new ReadableStream({
       start(controller) {
-        const mockResponse = `Это демо-ответ от Radon AI 30B параметров (API v2.0.0). Вы написали: "${prompt}". В реальной версии здесь будет интеллектуальный ответ, сгенерированный российской мультимодальной нейросетью с поддержкой function calling.`
-        const words = mockResponse.split(' ')
-        
-        let index = 0
-        const interval = setInterval(() => {
-          if (index < words.length) {
-            controller.enqueue({ 
-              content: words[index] + (index < words.length - 1 ? ' ' : ''), 
-              done: false 
-            })
-            index++
-          } else {
-            controller.enqueue({ content: '', done: true })
-            controller.close()
-            clearInterval(interval)
-          }
-        }, 100)
+        controller.enqueue({ 
+          content: 'Извините, произошла ошибка при обращении к Radon AI. Пожалуйста, попробуйте позже.', 
+          done: true 
+        })
+        controller.close()
       }
     })
   }

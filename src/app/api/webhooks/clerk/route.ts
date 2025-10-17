@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         data: {
           clerkId: id,
           email: email_addresses[0].email_address,
-          subscriptionTier: 'free',
+          subscription: 'free',
         },
       })
     } catch (error) {

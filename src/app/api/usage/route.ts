@@ -4,12 +4,24 @@ import { auth } from '@clerk/nextjs/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkUserId } = await auth()
     
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
         { status: 401 }
+      )
+    }
+
+    // Найти пользователя в БД по Clerk ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Пользователь не найден' },
+        { status: 404 }
       )
     }
 
@@ -22,7 +34,7 @@ export async function GET(request: NextRequest) {
     const messageCount = await prisma.message.count({
       where: {
         chat: {
-          userId
+          userId: user.id
         },
         role: 'user',
         createdAt: {
@@ -35,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Получаем статистику использования токенов
     const usageLogs = await prisma.usageLog.findMany({
       where: {
-        userId,
+        userId: user.id,
         date: {
           gte: startOfMonth,
           lte: endOfMonth
@@ -50,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Получаем подписку для определения лимитов
     const subscription = await prisma.subscription.findUnique({
-      where: { userId }
+      where: { userId: user.id }
     })
 
     const tier = subscription?.tier || 'free'
@@ -89,12 +101,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkUserId } = await auth()
     
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
         { status: 401 }
+      )
+    }
+
+    // Найти пользователя в БД по Clerk ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Пользователь не найден' },
+        { status: 404 }
       )
     }
 
@@ -104,7 +128,7 @@ export async function POST(request: NextRequest) {
     // Создаем запись об использовании
     const usageLog = await prisma.usageLog.create({
       data: {
-        userId,
+        userId: user.id,
         action,
         count: count || 1
       }

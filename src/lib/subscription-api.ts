@@ -46,7 +46,7 @@ export const subscriptionApi = {
     apiClient.post<PortalSessionResponse>('/api/subscription/portal'),
   
   getUsageStats: (period: string = '30d') =>
-    apiClient.get<UsageStatsResponse>(`/api/subscription/usage?period=${period}`)
+    apiClient.get<UsageStatsResponse>(`/api/usage?period=${period}`)
 }
 
 export default subscriptionApi

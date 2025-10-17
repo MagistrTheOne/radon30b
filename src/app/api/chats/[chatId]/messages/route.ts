@@ -73,9 +73,16 @@ export async function POST(
           await writeFile(join(uploadDir, fileName), buffer)
           audioUrl = `/uploads/audio/${fileName}`
           
-          // TODO: Получить длительность аудио из метаданных файла
-          // Пока что используем примерное значение
-          audioDuration = 30 // секунд
+          // Получаем длительность аудио из метаданных файла
+          try {
+            const { extractAudioMetadata } = await import('@/lib/audio-metadata')
+            const audioMetadata = await extractAudioMetadata(audioFile)
+            audioDuration = audioMetadata.duration
+          } catch (error) {
+            console.error('Error extracting audio metadata:', error)
+            // Fallback к примерному значению
+            audioDuration = Math.round(audioFile.size / 32000) // примерная длительность
+          }
         } catch (error) {
           console.error('Error saving audio:', error)
         }

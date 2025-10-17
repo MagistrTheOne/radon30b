@@ -4,17 +4,29 @@ import { auth } from '@clerk/nextjs/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkUserId } = await auth()
     
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
         { status: 401 }
       )
     }
 
+    // Найти пользователя в БД по Clerk ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Пользователь не найден' },
+        { status: 404 }
+      )
+    }
+
     const subscription = await prisma.subscription.findUnique({
-      where: { userId }
+      where: { userId: user.id }
     })
 
     if (!subscription) {
@@ -47,12 +59,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkUserId } = await auth()
     
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
         { status: 401 }
+      )
+    }
+
+    // Найти пользователя в БД по Clerk ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Пользователь не найден' },
+        { status: 404 }
       )
     }
 
@@ -61,13 +85,13 @@ export async function POST(request: NextRequest) {
 
     // Проверяем, есть ли уже подписка
     const existingSubscription = await prisma.subscription.findUnique({
-      where: { userId }
+      where: { userId: user.id }
     })
 
     if (existingSubscription) {
       // Обновляем существующую подписку
       const updatedSubscription = await prisma.subscription.update({
-        where: { userId },
+        where: { userId: user.id },
         data: {
           tier,
           status: 'active',
@@ -93,7 +117,7 @@ export async function POST(request: NextRequest) {
       // Создаем новую подписку
       const newSubscription = await prisma.subscription.create({
         data: {
-          userId,
+          userId: user.id,
           tier,
           status: 'active',
           stripeCustomerId,

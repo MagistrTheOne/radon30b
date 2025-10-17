@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -25,12 +25,14 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
+import { UserButtonWrapper } from '@/components/user-button-wrapper'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { ChatResponse } from '@/types/chat'
+import { subscriptionApi } from '@/lib/subscription-api'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { useChatContext } from '@/contexts/ChatContext'
@@ -44,6 +46,7 @@ interface ChatSidebarProps {
 export function ChatSidebar({ onClose }: ChatSidebarProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [chatToRename, setChatToRename] = useState<ChatResponse | null>(null)
+  const [subscription, setSubscription] = useState<'free' | 'pro' | 'enterprise'>('free')
   
   const { user } = useUser()
   const router = useRouter()
@@ -53,8 +56,26 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
     createChat, 
     deleteChat, 
     updateChat,
-    currentChat 
+    currentChat,
+    loadChat
   } = useChatContext()
+
+  // Загружаем подписку пользователя
+  useEffect(() => {
+    const loadSubscription = async () => {
+      if (!user?.id) return
+      
+      try {
+        const response = await subscriptionApi.getCurrentSubscription()
+        setSubscription(response.data.tier as 'free' | 'pro' | 'enterprise')
+      } catch (error) {
+        console.error('Error loading subscription:', error)
+        setSubscription('free')
+      }
+    }
+    
+    loadSubscription()
+  }, [user?.id])
 
   const createNewChat = async () => {
     await createChat('Новый чат')
@@ -107,9 +128,6 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
   }
 
   const getSubscriptionBadge = () => {
-    // Получаем реальные данные подписки из контекста или API
-    const subscription = 'free' as 'free' | 'pro' | 'enterprise' // TODO: Получить из getUserSubscription()
-    
     switch (subscription) {
       case 'pro':
         return <Badge className="bg-primary text-primary-foreground"><Crown className="w-3 h-3 mr-1" />Pro</Badge>
@@ -171,7 +189,7 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
                       key={chat.id}
                       className="group flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer"
                       onClick={() => {
-                        router.push(`/chat/${chat.id}`)
+                        loadChat(chat.id)
                         onClose?.()
                       }}
                     >

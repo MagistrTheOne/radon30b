@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -9,18 +10,65 @@ import {
   DollarSign,
   Activity,
   Zap,
-  Crown
+  Crown,
+  Loader2
 } from 'lucide-react'
+import { toast } from 'sonner'
+
+interface AdminStats {
+  totalUsers: number
+  totalTeams: number
+  totalRevenue: number
+  activeSubscriptions: number
+  dailyActiveUsers: number
+  monthlyGrowth: number
+  totalMessages: number
+  totalChats: number
+  subscriptionBreakdown: Record<string, number>
+}
 
 export default function AdminDashboard() {
-  // Mock data for demonstration
-  const stats = {
-    totalUsers: 1247,
-    totalTeams: 89,
-    totalRevenue: 45680,
-    activeSubscriptions: 234,
-    dailyActiveUsers: 156,
-    monthlyGrowth: 12.5
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadStats()
+  }, [])
+
+  const loadStats = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/stats')
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка загрузки статистики')
+      }
+
+      const data = await response.json()
+      setStats(data)
+    } catch (error) {
+      console.error('Error loading admin stats:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка загрузки статистики')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Не удалось загрузить статистику</p>
+      </div>
+    )
   }
 
   const recentActivity = [
@@ -99,6 +147,34 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-2xl font-bold">{stats.dailyActiveUsers}</p>
                 <p className="text-sm text-muted-foreground">Активных сегодня</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalMessages.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Всего сообщений</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-cyan-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalChats.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Всего чатов</p>
               </div>
             </div>
           </CardContent>

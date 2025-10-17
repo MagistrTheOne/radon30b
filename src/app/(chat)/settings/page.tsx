@@ -47,13 +47,47 @@ export default function SettingsPage() {
     }
   })
 
-  const handleSave = () => {
-    // TODO: Implement actual save functionality
-    toast.success('Настройки сохранены')
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка сохранения настроек')
+      }
+
+      toast.success('Настройки сохранены')
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка сохранения настроек')
+    }
   }
 
   const handleReset = () => {
-    // TODO: Implement reset functionality
+    setSettings({
+      theme: 'dark',
+      language: 'ru',
+      notifications: {
+        email: true,
+        push: true,
+        sound: true
+      },
+      privacy: {
+        profileVisibility: 'private',
+        dataSharing: false
+      },
+      ai: {
+        personality: 'helpful',
+        maxTokens: 2048,
+        streaming: true
+      }
+    })
     toast.info('Настройки сброшены к значениям по умолчанию')
   }
 

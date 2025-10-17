@@ -27,7 +27,7 @@ interface MessageListProps {
 export function MessageList({ messages, isLoading }: MessageListProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
-  const { editMessage, deleteMessage } = useChatContext()
+  const { editMessage, deleteMessage, regenerateMessage } = useChatContext()
   
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
@@ -81,30 +81,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   const regenerateResponse = async (messageId: string) => {
-    try {
-      const response = await fetch('/api/messages/regenerate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ messageId })
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Ошибка регенерации')
-      }
-
-      const newMessage = await response.json()
-      
-      // Добавляем новое сообщение в список
-      // TODO: Обновить состояние сообщений в контексте
-      toast.success('Ответ регенерирован успешно')
-      
-    } catch (error) {
-      console.error('Error regenerating message:', error)
-      toast.error(error instanceof Error ? error.message : 'Ошибка регенерации сообщения')
-    }
+    await regenerateMessage(messageId)
   }
 
   const formatMessageContent = (content: string) => {

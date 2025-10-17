@@ -20,9 +20,11 @@ import {
   Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useUser } from '@clerk/nextjs'
 import { subscriptionApi, SubscriptionResponse, UsageStatsResponse } from '@/lib/subscription-api'
 
 export default function SubscriptionPage() {
+  const { user } = useUser()
   const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
   const [usageStats, setUsageStats] = useState<UsageStatsResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,9 +32,11 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     loadSubscriptionData()
-  }, [])
+  }, [user?.id])
 
   const loadSubscriptionData = async () => {
+    if (!user?.id) return
+    
     try {
       setLoading(true)
       const [subscriptionResponse, usageResponse] = await Promise.all([

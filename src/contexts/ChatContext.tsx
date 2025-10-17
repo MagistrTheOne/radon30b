@@ -18,12 +18,13 @@ interface ChatContextType {
   createChat: (title: string) => Promise<void>
   updateChat: (chatId: string, title: string) => Promise<void>
   deleteChat: (chatId: string) => Promise<void>
-  selectChat: (chatId: string) => Promise<void>
+  loadChat: (chatId: string) => Promise<void>
   
   // Сообщения
   sendMessage: (content: string, imageUrl?: string, audioFile?: File) => Promise<void>
   editMessage: (messageId: string, content: string) => Promise<void>
   deleteMessage: (messageId: string) => Promise<void>
+  regenerateMessage: (messageId: string) => Promise<void>
   
   // Состояние
   setCurrentChat: (chat: ChatResponse | null) => void
@@ -191,7 +192,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const selectChat = async (chatId: string) => {
+  const loadChat = async (chatId: string) => {
     try {
       setLoading(true)
       const response = await chatApi.getChat(chatId)
@@ -346,6 +347,35 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const regenerateMessage = async (messageId: string) => {
+    if (!currentChat) return
+
+    try {
+      const response = await fetch('/api/messages/regenerate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ messageId })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка регенерации')
+      }
+
+      const newMessage = await response.json()
+      
+      // Добавляем новое сообщение в список
+      setMessages(prev => [...prev, newMessage])
+      toast.success('Ответ регенерирован успешно')
+      
+    } catch (error) {
+      console.error('Error regenerating message:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка регенерации сообщения')
+    }
+  }
+
   const value: ChatContextType = {
     chats,
     currentChat,
@@ -355,10 +385,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     createChat,
     updateChat,
     deleteChat,
-    selectChat,
+    loadChat,
     sendMessage,
     editMessage,
     deleteMessage,
+    regenerateMessage,
     setCurrentChat,
     setMessages,
     clearError

@@ -14,10 +14,13 @@ model User {
   id              String   @id @default(cuid())
   clerkId         String   @unique
   email           String   @unique
-  subscriptionTier String  @default("free")
+  name            String?
+  imageUrl        String?
+  subscription    String   @default("free")
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   chats           Chat[]
-  subscription    Subscription?
+  subscriptionData Subscription?
   usageLogs       UsageLog[]
   ownedTeams      Team[]       @relation("TeamOwner")
   teamMemberships TeamMember[]

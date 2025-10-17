@@ -30,7 +30,8 @@ import {
   Shield,
   Cookie
 } from 'lucide-react'
-import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
+import { useUser, SignInButton } from '@clerk/nextjs'
+import { UserButtonWrapper } from '@/components/user-button-wrapper'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -160,13 +161,7 @@ export function Header() {
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/chat">Чат</Link>
                 </Button>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8"
-                    }
-                  }}
-                />
+                <UserButtonWrapper />
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -286,13 +281,7 @@ export function Header() {
                       <span className="text-sm text-muted-foreground">
                         {user?.emailAddresses[0]?.emailAddress}
                       </span>
-                      <UserButton 
-                        appearance={{
-                          elements: {
-                            avatarBox: "w-8 h-8"
-                          }
-                        }}
-                      />
+                      <UserButtonWrapper />
                     </div>
                   </div>
                 ) : (

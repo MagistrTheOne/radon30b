@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Menu } from 'lucide-react'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
+import { UserButtonWrapper } from '@/components/user-button-wrapper'
 import { ChatProvider } from '@/contexts/ChatContext'
 import { ErrorBoundary } from '@/components/error-boundary'
 
@@ -56,18 +57,12 @@ export default function ChatLayout({
             
             <div className="flex items-center gap-3">
               <ThemeToggle />
-              <UserButton 
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8"
-                  }
-                }}
-              />
+              <UserButtonWrapper />
             </div>
           </header>
 
           {/* Chat Content */}
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-y-auto">
             {children}
           </main>
         </div>
