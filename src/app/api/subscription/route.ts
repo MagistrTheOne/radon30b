@@ -25,15 +25,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const subscription = await prisma.subscription.findUnique({
+    let subscription = await prisma.subscription.findUnique({
       where: { userId: user.id }
     })
 
+    // Если подписка не найдена, создаем бесплатную подписку по умолчанию
     if (!subscription) {
-      return NextResponse.json(
-        { error: 'Подписка не найдена' },
-        { status: 404 }
-      )
+      subscription = await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          tier: 'free',
+          status: 'active'
+        }
+      })
     }
 
     return NextResponse.json({

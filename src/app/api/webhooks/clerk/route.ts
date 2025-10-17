@@ -46,12 +46,22 @@ export async function POST(req: NextRequest) {
     const { id, email_addresses } = evt.data
 
     try {
-      await prisma.user.create({
+      // Создаем пользователя
+      const user = await prisma.user.create({
         data: {
           clerkId: id,
           email: email_addresses[0].email_address,
           subscription: 'free',
         },
+      })
+
+      // Создаем бесплатную подписку по умолчанию
+      await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          tier: 'free',
+          status: 'active'
+        }
       })
     } catch (error) {
       console.error('Error creating user:', error)

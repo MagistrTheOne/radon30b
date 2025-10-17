@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Преобразовать в формат, ожидаемый фронтендом
-        const formattedChats = chats.map((chat: { id: string; title: string; createdAt: Date; _count: { messages: number } }) => ({
+    const formattedChats = chats.map((chat: any) => ({
       id: chat.id,
       title: chat.title,
       createdAt: chat.createdAt.toISOString(),

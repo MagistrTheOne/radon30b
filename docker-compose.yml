@@ -66,8 +66,22 @@ services:
       - ENVIRONMENT=development
       - RADON_API_URL=http://213.219.215.235:8000
       - RADON_API_KEY=${RADON_API_KEY}
+      - QWEN_MODEL_PATH=${QWEN_MODEL_PATH}
+      - QWEN_USE_LOCAL_MODEL=${QWEN_USE_LOCAL_MODEL}
+      - QWEN_DEFAULT_SPEAKER=${QWEN_DEFAULT_SPEAKER}
+      - QWEN_USE_AUDIO_IN_VIDEO=${QWEN_USE_AUDIO_IN_VIDEO}
+    volumes:
+      - ai_model_cache:/root/.cache/huggingface
+      - ai_temp_files:/tmp
     depends_on:
       - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   # Chat Service
   chat-service:
@@ -152,3 +166,5 @@ volumes:
   postgres_data:
   redis_data:
   file_uploads:
+  ai_model_cache:
+  ai_temp_files:

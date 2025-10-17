@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import httpx
@@ -6,9 +6,14 @@ import os
 import json
 import time
 import logging
-from typing import Optional, Dict, Any
+import torch
+import soundfile as sf
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
 import asyncio
+import base64
+import io
+from PIL import Image
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,9 +37,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Radon AI API configuration
+# Qwen3-Omni configuration
+QWEN_MODEL_PATH = os.getenv("QWEN_MODEL_PATH", "Qwen/Qwen3-Omni-30B-A3B-Instruct")
 RADON_API_URL = os.getenv("RADON_API_URL", "http://213.219.215.235:8000")
 RADON_API_KEY = os.getenv("RADON_API_KEY")
+
+# Initialize Qwen3-Omni model (lazy loading)
+model = None
+processor = None
 
 # Request models
 class InferenceRequest(BaseModel):
@@ -47,17 +57,28 @@ class InferenceRequest(BaseModel):
     user_id: Optional[str] = None
     image_url: Optional[str] = None
     audio_url: Optional[str] = None
+    video_url: Optional[str] = None
 
 class MultimodalRequest(BaseModel):
     text: Optional[str] = None
     image_url: Optional[str] = None
     audio_url: Optional[str] = None
+    video_url: Optional[str] = None
     max_new_tokens: int = 2048
     temperature: float = 0.7
     personality: str = "helpful"
     enable_functions: bool = True
     conversation_id: Optional[str] = None
     user_id: Optional[str] = None
+    speaker: str = "Ethan"  # For audio output
+    use_audio_in_video: bool = True
+
+class QwenConversationRequest(BaseModel):
+    messages: List[Dict[str, Any]]
+    speaker: str = "Ethan"
+    use_audio_in_video: bool = True
+    max_new_tokens: int = 2048
+    temperature: float = 0.7
 
 # Response models
 class InferenceResponse(BaseModel):
@@ -67,6 +88,13 @@ class InferenceResponse(BaseModel):
     personality_used: Optional[str] = None
     tokens_used: Optional[int] = None
     processing_time: float
+    audio_url: Optional[str] = None  # For audio output
+
+class QwenResponse(BaseModel):
+    text: str
+    audio_url: Optional[str] = None
+    processing_time: float
+    tokens_used: Optional[int] = None
 
 class HealthResponse(BaseModel):
     status: str
@@ -83,6 +111,138 @@ metrics = {
     "error_count": 0,
     "last_request": None
 }
+
+# Helper functions
+async def load_qwen_model():
+    """Load Qwen3-Omni model and processor"""
+    global model, processor
+    
+    if model is None or processor is None:
+        try:
+            from transformers import Qwen3OmniMoeForConditionalGeneration, Qwen3OmniMoeProcessor
+            from qwen_omni_utils import process_mm_info
+            
+            logger.info(f"Loading Qwen3-Omni model: {QWEN_MODEL_PATH}")
+            
+            model = Qwen3OmniMoeForConditionalGeneration.from_pretrained(
+                QWEN_MODEL_PATH,
+                dtype="auto",
+                device_map="auto",
+                attn_implementation="flash_attention_2",
+                torch_dtype=torch.bfloat16
+            )
+            
+            processor = Qwen3OmniMoeProcessor.from_pretrained(QWEN_MODEL_PATH)
+            
+            logger.info("Qwen3-Omni model loaded successfully")
+            
+        except Exception as e:
+            logger.error(f"Error loading Qwen3-Omni model: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Model loading failed: {str(e)}")
+
+async def process_multimodal_input(request: MultimodalRequest) -> Dict[str, Any]:
+    """Process multimodal input for Qwen3-Omni"""
+    try:
+        from qwen_omni_utils import process_mm_info
+        
+        # Build conversation format
+        content = []
+        
+        if request.image_url:
+            content.append({"type": "image", "image": request.image_url})
+        if request.audio_url:
+            content.append({"type": "audio", "audio": request.audio_url})
+        if request.video_url:
+            content.append({"type": "video", "video": request.video_url})
+        if request.text:
+            content.append({"type": "text", "text": request.text})
+        
+        conversation = [{"role": "user", "content": content}]
+        
+        # Process multimodal info
+        text = processor.apply_chat_template(
+            conversation, 
+            add_generation_prompt=True, 
+            tokenize=False
+        )
+        
+        audios, images, videos = process_mm_info(
+            conversation, 
+            use_audio_in_video=request.use_audio_in_video
+        )
+        
+        inputs = processor(
+            text=text,
+            audio=audios,
+            images=images,
+            videos=videos,
+            return_tensors="pt",
+            padding=True,
+            use_audio_in_video=request.use_audio_in_video
+        )
+        
+        inputs = inputs.to(model.device).to(model.dtype)
+        
+        return {
+            "inputs": inputs,
+            "conversation": conversation
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing multimodal input: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Input processing failed: {str(e)}")
+
+async def generate_qwen_response(
+    inputs: Dict[str, Any], 
+    speaker: str = "Ethan",
+    max_new_tokens: int = 2048,
+    temperature: float = 0.7,
+    use_audio_in_video: bool = True
+) -> Dict[str, Any]:
+    """Generate response using Qwen3-Omni"""
+    try:
+        # Generate text and audio
+        text_ids, audio = model.generate(
+            **inputs,
+            speaker=speaker,
+            thinker_return_dict_in_generate=True,
+            use_audio_in_video=use_audio_in_video,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            do_sample=True if temperature > 0 else False
+        )
+        
+        # Decode text
+        text = processor.batch_decode(
+            text_ids.sequences[:, inputs["input_ids"].shape[1]:],
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False
+        )[0]
+        
+        # Save audio if generated
+        audio_url = None
+        if audio is not None:
+            audio_filename = f"qwen_audio_{int(time.time())}.wav"
+            audio_path = f"/tmp/{audio_filename}"
+            
+            sf.write(
+                audio_path,
+                audio.reshape(-1).detach().cpu().numpy(),
+                samplerate=24000,
+            )
+            
+            # In production, upload to file service
+            audio_url = f"/api/files/{audio_filename}"
+        
+        return {
+            "text": text,
+            "audio_url": audio_url,
+            "tokens_used": text_ids.sequences.shape[1] - inputs["input_ids"].shape[1]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating Qwen response: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 async def call_radon_api(request_data: Dict[str, Any], stream: bool = False) -> Dict[str, Any]:
     """Call Radon AI API with retry logic"""
@@ -181,11 +341,26 @@ async def health_check():
     except:
         radon_healthy = False
     
+    # Check Qwen3-Omni model status
+    qwen_loaded = model is not None and processor is not None
+    gpu_available = torch.cuda.is_available() if torch.cuda.is_available() else False
+    
+    # Get GPU memory usage if available
+    memory_usage = None
+    if torch.cuda.is_available():
+        memory_usage = {
+            "allocated": torch.cuda.memory_allocated() / 1024**3,  # GB
+            "reserved": torch.cuda.memory_reserved() / 1024**3,    # GB
+            "max_allocated": torch.cuda.max_memory_allocated() / 1024**3  # GB
+        }
+    
+    overall_status = "healthy" if (radon_healthy or qwen_loaded) else "degraded"
+    
     return HealthResponse(
-        status="healthy" if radon_healthy else "degraded",
-        model_loaded=radon_healthy,
-        gpu_available=radon_healthy,  # In production, check actual GPU status
-        memory_usage=None,  # In production, get actual memory usage
+        status=overall_status,
+        model_loaded=qwen_loaded,
+        gpu_available=gpu_available,
+        memory_usage=memory_usage,
         timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     )
 
@@ -287,50 +462,207 @@ async def inference_stream(request: InferenceRequest):
 
 @app.post("/multimodal", response_model=InferenceResponse)
 async def multimodal_inference(request: MultimodalRequest):
-    """Multimodal AI inference (text, image, audio)"""
+    """Multimodal AI inference (text, image, audio, video) using Qwen3-Omni"""
     start_time = time.time()
     
     try:
-        # Prepare request data
-        request_data = {
-            "max_new_tokens": request.max_new_tokens,
-            "temperature": request.temperature,
-            "personality": request.personality,
-            "enable_functions": request.enable_functions,
-            "conversation_id": request.conversation_id,
-            "user_id": request.user_id
-        }
+        # Load Qwen3-Omni model if not loaded
+        await load_qwen_model()
         
-        # Add content based on what's provided
-        if request.text:
-            request_data["prompt"] = request.text
-        if request.image_url:
-            request_data["image_url"] = request.image_url
-        if request.audio_url:
-            request_data["audio_url"] = request.audio_url
+        # Process multimodal input
+        processed_input = await process_multimodal_input(request)
         
-        # Call Radon API
-        response = await call_radon_api(request_data)
+        # Generate response
+        qwen_response = await generate_qwen_response(
+            processed_input["inputs"],
+            speaker=request.speaker,
+            max_new_tokens=request.max_new_tokens,
+            temperature=request.temperature,
+            use_audio_in_video=request.use_audio_in_video
+        )
         
         # Update metrics
         processing_time = time.time() - start_time
         metrics["total_requests"] += 1
-        metrics["total_tokens"] += response.get("tokens_used", 0)
+        metrics["total_tokens"] += qwen_response.get("tokens_used", 0)
         metrics["average_latency"] = (metrics["average_latency"] + processing_time) / 2
         metrics["last_request"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         
         return InferenceResponse(
-            response=response.get("response", ""),
-            conversation_id=response.get("conversation_id"),
-            function_calls=response.get("function_calls"),
-            personality_used=response.get("personality_used"),
-            tokens_used=response.get("tokens_used"),
-            processing_time=processing_time
+            response=qwen_response["text"],
+            conversation_id=request.conversation_id,
+            function_calls=None,
+            personality_used=request.personality,
+            tokens_used=qwen_response.get("tokens_used"),
+            processing_time=processing_time,
+            audio_url=qwen_response.get("audio_url")
         )
         
     except Exception as e:
         metrics["error_count"] += 1
         logger.error(f"Multimodal inference error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/qwen/conversation", response_model=QwenResponse)
+async def qwen_conversation(request: QwenConversationRequest):
+    """Direct Qwen3-Omni conversation with full control"""
+    start_time = time.time()
+    
+    try:
+        # Load Qwen3-Omni model if not loaded
+        await load_qwen_model()
+        
+        # Process conversation
+        from qwen_omni_utils import process_mm_info
+        
+        text = processor.apply_chat_template(
+            request.messages,
+            add_generation_prompt=True,
+            tokenize=False
+        )
+        
+        audios, images, videos = process_mm_info(
+            request.messages,
+            use_audio_in_video=request.use_audio_in_video
+        )
+        
+        inputs = processor(
+            text=text,
+            audio=audios,
+            images=images,
+            videos=videos,
+            return_tensors="pt",
+            padding=True,
+            use_audio_in_video=request.use_audio_in_video
+        )
+        
+        inputs = inputs.to(model.device).to(model.dtype)
+        
+        # Generate response
+        qwen_response = await generate_qwen_response(
+            inputs,
+            speaker=request.speaker,
+            max_new_tokens=request.max_new_tokens,
+            temperature=request.temperature,
+            use_audio_in_video=request.use_audio_in_video
+        )
+        
+        # Update metrics
+        processing_time = time.time() - start_time
+        metrics["total_requests"] += 1
+        metrics["total_tokens"] += qwen_response.get("tokens_used", 0)
+        metrics["average_latency"] = (metrics["average_latency"] + processing_time) / 2
+        metrics["last_request"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        
+        return QwenResponse(
+            text=qwen_response["text"],
+            audio_url=qwen_response.get("audio_url"),
+            processing_time=processing_time,
+            tokens_used=qwen_response.get("tokens_used")
+        )
+        
+    except Exception as e:
+        metrics["error_count"] += 1
+        logger.error(f"Qwen conversation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/qwen/upload")
+async def upload_multimodal_files(
+    files: List[UploadFile] = File(...),
+    text: Optional[str] = None,
+    speaker: str = "Ethan",
+    max_new_tokens: int = 2048,
+    temperature: float = 0.7
+):
+    """Upload files and process with Qwen3-Omni"""
+    start_time = time.time()
+    
+    try:
+        # Load Qwen3-Omni model if not loaded
+        await load_qwen_model()
+        
+        # Process uploaded files
+        content = []
+        
+        for file in files:
+            if file.content_type.startswith("image/"):
+                # Save image temporarily
+                image_data = await file.read()
+                image = Image.open(io.BytesIO(image_data))
+                image_path = f"/tmp/{file.filename}"
+                image.save(image_path)
+                content.append({"type": "image", "image": image_path})
+                
+            elif file.content_type.startswith("audio/"):
+                # Save audio temporarily
+                audio_data = await file.read()
+                audio_path = f"/tmp/{file.filename}"
+                with open(audio_path, "wb") as f:
+                    f.write(audio_data)
+                content.append({"type": "audio", "audio": audio_path})
+                
+            elif file.content_type.startswith("video/"):
+                # Save video temporarily
+                video_data = await file.read()
+                video_path = f"/tmp/{file.filename}"
+                with open(video_path, "wb") as f:
+                    f.write(video_data)
+                content.append({"type": "video", "video": video_path})
+        
+        if text:
+            content.append({"type": "text", "text": text})
+        
+        conversation = [{"role": "user", "content": content}]
+        
+        # Process with Qwen3-Omni
+        from qwen_omni_utils import process_mm_info
+        
+        text_template = processor.apply_chat_template(
+            conversation,
+            add_generation_prompt=True,
+            tokenize=False
+        )
+        
+        audios, images, videos = process_mm_info(conversation, use_audio_in_video=True)
+        
+        inputs = processor(
+            text=text_template,
+            audio=audios,
+            images=images,
+            videos=videos,
+            return_tensors="pt",
+            padding=True,
+            use_audio_in_video=True
+        )
+        
+        inputs = inputs.to(model.device).to(model.dtype)
+        
+        # Generate response
+        qwen_response = await generate_qwen_response(
+            inputs,
+            speaker=speaker,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            use_audio_in_video=True
+        )
+        
+        # Update metrics
+        processing_time = time.time() - start_time
+        metrics["total_requests"] += 1
+        metrics["total_tokens"] += qwen_response.get("tokens_used", 0)
+        metrics["average_latency"] = (metrics["average_latency"] + processing_time) / 2
+        metrics["last_request"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        
+        return QwenResponse(
+            text=qwen_response["text"],
+            audio_url=qwen_response.get("audio_url"),
+            processing_time=processing_time,
+            tokens_used=qwen_response.get("tokens_used")
+        )
+        
+    except Exception as e:
+        metrics["error_count"] += 1
+        logger.error(f"File upload processing error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")

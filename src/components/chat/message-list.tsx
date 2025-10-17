@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
+import { Card } from '@/components/ui/card'
 import { Copy, RotateCcw, User, Bot, Edit3, Trash2, Save, X, History, Mic } from 'lucide-react'
 import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
@@ -120,12 +121,16 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
     <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {messages.length === 0 ? (
-          <div className="text-center py-12">
-            <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Добро пожаловать в Radon AI</h3>
-            <p className="text-muted-foreground">
-              Начните разговор, задав вопрос или загрузив изображение
-            </p>
+          <div className="flex justify-center py-12">
+            <Card className="max-w-md mx-auto p-8 text-center bg-card/50 backdrop-blur-sm border-border/50">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bot className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Добро пожаловать в Radon AI</h3>
+              <p className="text-muted-foreground">
+                Начните разговор, задав вопрос или загрузив изображение
+              </p>
+            </Card>
           </div>
         ) : (
           messages.map((message) => (
