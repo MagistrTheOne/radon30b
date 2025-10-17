@@ -139,9 +139,9 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
   const groupedChats = groupChatsByDate(chats)
 
   return (
-    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
+    <div className="flex flex-col h-full bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border">
       {/* Header */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="p-4 border-b border-sidebar-border backdrop-blur-sm bg-sidebar/50">
         <Button 
           onClick={createNewChat}
           className="w-full justify-start gap-2"
@@ -153,7 +153,7 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
       </div>
 
       {/* Subscription Status */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="p-4 border-b border-sidebar-border backdrop-blur-sm bg-sidebar/50">
         <div className="flex items-center justify-between">
           <span className="text-sm text-sidebar-foreground">Подписка</span>
           {getSubscriptionBadge()}

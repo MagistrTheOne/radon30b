@@ -8,10 +8,10 @@ import Link from 'next/link'
 export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(156,146,172,0.1)_1px,transparent_0)] bg-[length:20px_20px]" />
+      {/* Simple dark background with subtle pattern */}
+      <div className="absolute inset-0 bg-background">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] bg-[length:40px_40px]" />
         </div>
       </div>
 
@@ -40,7 +40,7 @@ export function Hero() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight"
           >
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="text-foreground">
               Radon AI
             </span>
             <br />

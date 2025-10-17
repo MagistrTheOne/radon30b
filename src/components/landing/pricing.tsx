@@ -118,7 +118,7 @@ export function Pricing() {
                   : 'border-border hover:border-primary/50'
               } transition-all duration-300`}>
                 {plan.popular && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                 )}
                 
                 <CardHeader className="text-center pb-8">

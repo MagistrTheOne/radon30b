@@ -42,7 +42,7 @@ export default function ChatLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold">Radon AI</h1>
             <span className="text-sm text-muted-foreground">
