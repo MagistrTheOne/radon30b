@@ -10,7 +10,6 @@ import { useUser } from '@clerk/nextjs'
 import { UserButtonWrapper } from '@/components/user-button-wrapper'
 import { ChatProvider } from '@/contexts/ChatContext'
 import { ErrorBoundary } from '@/components/error-boundary'
-import { DebugUser } from '@/components/debug-user'
 
 export default function ChatLayout({
   children,
@@ -62,9 +61,6 @@ export default function ChatLayout({
             </div>
           </header>
 
-          {/* Debug Info */}
-          <DebugUser />
-          
           {/* Chat Content */}
           <main className="flex-1 overflow-y-auto">
             {children}
