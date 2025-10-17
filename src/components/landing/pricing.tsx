@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Star, Zap, Crown, Building2 } from 'lucide-react'
-import Link from 'next/link'
 
 const plans = [
   {
@@ -136,7 +135,7 @@ export function Pricing() {
               <Card className={`h-full relative overflow-hidden bg-card/80 backdrop-blur-md ${
                 plan.popular 
                   ? 'border-primary shadow-lg scale-105' 
-                  : 'border-border hover:border-primary/50'
+                  : 'border-border'
               } transition-all duration-300`}>
                 <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                 
@@ -184,17 +183,15 @@ export function Pricing() {
                 
                 <CardFooter className="relative z-10">
                   <Button 
-                    asChild 
+                    onClick={() => window.location.href = plan.href}
                     className={`w-full ${
                       plan.popular 
-                        ? 'bg-primary hover:bg-primary/90' 
-                        : 'bg-secondary hover:bg-secondary/80'
+                        ? 'bg-white text-black hover:bg-gray-100 border-0' 
+                        : 'bg-gray-800 text-white hover:bg-gray-700 border-0'
                     }`}
                     size="lg"
                   >
-                    <Link href={plan.href}>
-                      {plan.cta}
-                    </Link>
+                    {plan.cta}
                   </Button>
                 </CardFooter>
               </Card>
@@ -213,7 +210,7 @@ export function Pricing() {
             Все планы включают 14-дневную гарантию возврата денег
           </p>
           <p className="text-sm text-muted-foreground">
-            Нужна помощь с выбором? <Link href="/contact" className="text-primary hover:underline">Свяжитесь с нами</Link>
+            Нужна помощь с выбором? <button onClick={() => window.location.href = '/contact'} className="text-primary hover:underline cursor-pointer">Свяжитесь с нами</button>
           </p>
         </motion.div>
       </div>

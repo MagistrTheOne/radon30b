@@ -4,17 +4,64 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Menu, X, Brain } from 'lucide-react'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { 
+  Menu, 
+  X, 
+  Brain, 
+  ChevronDown,
+  Zap,
+  CreditCard,
+  Code,
+  Activity,
+  HelpCircle,
+  BookOpen,
+  Users,
+  Building,
+  FileText,
+  Briefcase,
+  Mail,
+  Shield,
+  Cookie
+} from 'lucide-react'
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isSignedIn, user } = useUser()
 
-  const navigation = [
-    { name: 'Возможности', href: '#features' },
-    { name: 'Тарифы', href: '#pricing' },
-    { name: 'О проекте', href: '#about' },
+  const productMenu = [
+    { name: 'Возможности', href: '/features', icon: Zap },
+    { name: 'Тарифы', href: '/pricing', icon: CreditCard },
+    { name: 'API', href: '/api', icon: Code },
+    { name: 'Статус', href: '/status', icon: Activity },
+  ]
+
+  const supportMenu = [
+    { name: 'Поддержка', href: '/support', icon: HelpCircle },
+    { name: 'FAQ', href: '/faq', icon: HelpCircle },
+    { name: 'Документация', href: '/docs', icon: BookOpen },
+    { name: 'Сообщество', href: '/community', icon: Users },
+  ]
+
+  const companyMenu = [
+    { name: 'О проекте', href: '/about', icon: Building },
+    { name: 'Блог', href: '/blog', icon: FileText },
+    { name: 'Карьера', href: '/careers', icon: Briefcase },
+    { name: 'Контакты', href: '/contact', icon: Mail },
+  ]
+
+  const legalMenu = [
+    { name: 'Политика конфиденциальности', href: '/privacy', icon: Shield },
+    { name: 'Условия использования', href: '/terms', icon: FileText },
+    { name: 'Cookie', href: '/cookies', icon: Cookie },
+    { name: 'GDPR', href: '/gdpr', icon: Shield },
   ]
 
   return (
@@ -30,16 +77,78 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-              >
-                {item.name}
-              </Link>
-            ))}
+          <nav className="hidden md:flex items-center gap-6">
+            {/* Продукт */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+                Продукт
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48">
+                {productMenu.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Поддержка */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+                Поддержка
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48">
+                {supportMenu.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Компания */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+                Компания
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48">
+                {companyMenu.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Правовая информация */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+                Правовая информация
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {legalMenu.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Desktop Actions */}
@@ -95,16 +204,77 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {/* Продукт */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-semibold text-foreground mb-2">Продукт</div>
+                <div className="space-y-1 ml-4">
+                  {productMenu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Поддержка */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-semibold text-foreground mb-2">Поддержка</div>
+                <div className="space-y-1 ml-4">
+                  {supportMenu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Компания */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-semibold text-foreground mb-2">Компания</div>
+                <div className="space-y-1 ml-4">
+                  {companyMenu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Правовая информация */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-semibold text-foreground mb-2">Правовая информация</div>
+                <div className="space-y-1 ml-4">
+                  {legalMenu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
               
               <div className="pt-4 border-t border-border/50">
                 {isSignedIn ? (

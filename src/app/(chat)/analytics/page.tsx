@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {usageStats?.dailyBreakdown.length > 0 
+                  {usageStats?.dailyBreakdown && usageStats.dailyBreakdown.length > 0 
                     ? Math.round(usageStats.totalRequests / usageStats.dailyBreakdown.length)
                     : 0
                   }
@@ -280,7 +280,7 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 <p className="text-lg font-bold">
-                  {usageStats?.dailyBreakdown.length > 0 
+                  {(usageStats?.dailyBreakdown && usageStats?.totalRequests != null && usageStats.dailyBreakdown.length > 0)
                     ? Math.round(usageStats.totalRequests / usageStats.dailyBreakdown.length)
                     : 0
                   }
