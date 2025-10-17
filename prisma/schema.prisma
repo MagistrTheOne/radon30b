@@ -24,25 +24,34 @@ model User {
 }
 
 model Chat {
-  id        String    @id @default(cuid())
-  userId    String
-  title     String
-  createdAt DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages  Message[]
+  id          String     @id @default(cuid())
+  userId      String
+  workspaceId String?
+  title       String
+  createdAt   DateTime   @default(now())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  messages    Message[]
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  chatId    String
-  role      String
-  content   String   @db.Text
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  editedAt  DateTime?
-  isEdited  Boolean  @default(false)
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  edits     MessageEdit[]
+  id                  String   @id @default(cuid())
+  chatId              String
+  role                String
+  content             String   @db.Text
+  imageUrl            String?
+  audioUrl            String?
+  audioTranscription  String?  @db.Text
+  audioDuration       Int?     // в секундах
+  // Новые поля для API v2.0.0
+  functionCalls       Json?    // Function calls в JSON формате
+  personalityUsed     String?  // Использованная личность
+  conversationId      String?  // ID разговора в Radon API
+  createdAt           DateTime @default(now())
+  editedAt            DateTime?
+  isEdited            Boolean  @default(false)
+  chat                Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  edits               MessageEdit[]
 }
 
 model Subscription {
@@ -112,4 +121,31 @@ model MessageEdit {
   editedAt        DateTime @default(now())
   
   message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  email        String    @unique
+  role         String    @default("admin") // admin, super_admin, owner
+  permissions  Json      @default("[]")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+  updatedAt    DateTime  @updatedAt
+}
+
+model ContactRequest {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  subject     String
+  message     String   @db.Text
+  type        String   @default("contact") // contact, support, gdpr, bug_report
+  status      String   @default("new") // new, in_progress, resolved, closed
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
 }

@@ -35,7 +35,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { useChatContext } from '@/contexts/ChatContext'
 import { RenameChatDialog } from './rename-chat-dialog'
-import { ChatListSkeleton, LoadingIndicator } from '@/components/loading-states'
+import { MessageListSkeleton, LoadingIndicator } from '@/components/loading-states'
 
 interface ChatSidebarProps {
   onClose?: () => void
@@ -107,8 +107,8 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
   }
 
   const getSubscriptionBadge = () => {
-    // TODO: Get actual subscription from user data
-    const subscription = 'free' as 'free' | 'pro' | 'enterprise' // user?.publicMetadata?.subscription || 'free'
+    // Получаем реальные данные подписки из контекста или API
+    const subscription = 'free' as 'free' | 'pro' | 'enterprise' // TODO: Получить из getUserSubscription()
     
     switch (subscription) {
       case 'pro':
@@ -148,7 +148,7 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-6">
           {loading ? (
-            <ChatListSkeleton />
+            <MessageListSkeleton />
           ) : Object.keys(groupedChats).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />

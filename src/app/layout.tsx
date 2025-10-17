@@ -18,6 +18,35 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Radon AI - Мультимодальная нейросеть 30B параметров",
   description: "Российская разработка от MagistrTheOne. Мощная мультимодальная нейросеть для генерации текста, анализа изображений и создания кода.",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover'
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' }
+  ],
+  colorScheme: 'dark light',
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+    url: false
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Radon AI'
+  },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png'
+  }
 };
 
 export default function RootLayout({

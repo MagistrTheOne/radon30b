@@ -4,11 +4,12 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
-import { ImageIcon, Send, X, Upload } from 'lucide-react'
+import { ImageIcon, Send, X, Upload, Mic, MicOff, Play, Square } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAudioRecorder } from '@/hooks/use-audio-recorder'
 
 interface MessageInputProps {
-  onSendMessage: (content: string, imageUrl?: string) => void
+  onSendMessage: (content: string, imageUrl?: string, audioFile?: File) => void
   disabled?: boolean
 }
 
@@ -17,8 +18,22 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [audioPreview, setAudioPreview] = useState<string | null>(null)
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  
+  const {
+    isRecording,
+    audioBlob,
+    duration,
+    startRecording,
+    stopRecording,
+    clearRecording,
+    hasPermission,
+    requestPermission
+  } = useAudioRecorder()
 
   useEffect(() => {
     // Auto-resize textarea
@@ -28,6 +43,15 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
     }
   }, [message])
 
+  // Создаем preview аудио когда запись завершена
+  useEffect(() => {
+    if (audioBlob) {
+      const audioUrl = URL.createObjectURL(audioBlob)
+      setAudioPreview(audioUrl)
+      return () => URL.revokeObjectURL(audioUrl)
+    }
+  }, [audioBlob])
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -36,34 +60,55 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   }
 
   const handleSend = async () => {
-    if (!message.trim() && !imageFile) return
+    if (!message.trim() && !imageFile && !audioBlob) return
 
     let imageUrl: string | undefined
 
     if (imageFile) {
       try {
         setIsUploading(true)
-        // TODO: Replace with actual file upload API
-        // const formData = new FormData()
-        // formData.append('file', imageFile)
-        // const response = await apiClient.post('/api/upload', formData)
-        // imageUrl = response.data.url
         
-        // Mock upload for now
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        imageUrl = URL.createObjectURL(imageFile)
+        // Используем реальный API загрузки
+        const formData = new FormData()
+        formData.append('file', imageFile)
+        formData.append('folder', 'images')
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Ошибка загрузки файла')
+        }
+        
+        const data = await response.json()
+        imageUrl = data.url
+        
+        toast.success('Изображение загружено успешно')
+        
       } catch (error) {
-        toast.error('Ошибка загрузки изображения')
+        console.error('Error uploading image:', error)
+        toast.error(error instanceof Error ? error.message : 'Ошибка загрузки изображения')
         return
       } finally {
         setIsUploading(false)
       }
     }
 
-    onSendMessage(message.trim(), imageUrl)
+    // Создаем File из audioBlob для отправки
+    let audioFile: File | undefined
+    if (audioBlob) {
+      audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' })
+    }
+
+    onSendMessage(message.trim(), imageUrl, audioFile)
     setMessage('')
     setImageFile(null)
     setImagePreview(null)
+    clearRecording()
+    setAudioPreview(null)
   }
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +145,45 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
     }
   }
 
-  const canSend = message.trim() || imageFile
+  const handleAudioToggle = async () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      if (!hasPermission) {
+        await requestPermission()
+      }
+      await startRecording()
+    }
+  }
+
+  const removeAudio = () => {
+    clearRecording()
+    setAudioPreview(null)
+  }
+
+  const playAudio = () => {
+    if (audioRef.current && audioPreview) {
+      if (isPlayingAudio) {
+        audioRef.current.pause()
+        setIsPlayingAudio(false)
+      } else {
+        audioRef.current.play()
+        setIsPlayingAudio(true)
+      }
+    }
+  }
+
+  const handleAudioEnded = () => {
+    setIsPlayingAudio(false)
+  }
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const canSend = message.trim() || imageFile || audioBlob
   const isLoading = disabled || isUploading
 
   return (
@@ -136,6 +219,71 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
           </Card>
         )}
 
+        {/* Audio Preview */}
+        {audioPreview && (
+          <Card className="mb-4 p-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={playAudio}
+                className="h-10 w-10"
+              >
+                {isPlayingAudio ? (
+                  <Square className="w-4 h-4" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+              </Button>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Голосовое сообщение</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDuration(duration)}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={removeAudio}
+                className="h-8 w-8"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <audio
+              ref={audioRef}
+              src={audioPreview}
+              onEnded={handleAudioEnded}
+              className="hidden"
+            />
+          </Card>
+        )}
+
+        {/* Recording Indicator */}
+        {isRecording && (
+          <Card className="mb-4 p-4 border-red-500/50 bg-red-500/10">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-red-500">Запись...</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  {formatDuration(duration)}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={stopRecording}
+                className="h-8 w-8 text-red-500 hover:text-red-600"
+              >
+                <Square className="w-4 h-4" />
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Input Area */}
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
@@ -149,15 +297,30 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               disabled={isLoading}
             />
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 bottom-2 h-8 w-8"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-            >
-              <ImageIcon className="w-4 h-4" />
-            </Button>
+            <div className="absolute right-2 bottom-2 flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+              >
+                <ImageIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-8 w-8 ${isRecording ? 'text-red-500' : ''}`}
+                onClick={handleAudioToggle}
+                disabled={isLoading}
+              >
+                {isRecording ? (
+                  <MicOff className="w-4 h-4" />
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
             
             <input
               ref={fileInputRef}
@@ -185,7 +348,9 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
         {/* Help Text */}
         <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
           <span>
-            {imageFile ? 'Изображение готово к отправке' : 'Поддерживаются изображения до 5MB'}
+            {imageFile ? 'Изображение готово к отправке' : 
+             audioBlob ? 'Аудио готово к отправке' :
+             'Поддерживаются изображения до 5MB и голосовые сообщения'}
           </span>
           <span>Enter для отправки • Shift+Enter для новой строки</span>
         </div>

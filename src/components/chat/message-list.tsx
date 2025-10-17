@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
-import { Copy, RotateCcw, User, Bot, Edit3, Trash2, Save, X, History } from 'lucide-react'
+import { Copy, RotateCcw, User, Bot, Edit3, Trash2, Save, X, History, Mic } from 'lucide-react'
 import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -16,6 +16,8 @@ import { useTheme } from 'next-themes'
 import { useChatContext } from '@/contexts/ChatContext'
 import { MessageHistoryDialog } from './message-history-dialog'
 import { MessageListSkeleton, LoadingIndicator } from '@/components/loading-states'
+import { AudioPlayer } from './audio-player'
+import { FunctionCallDisplay, FunctionCall } from './function-call-display'
 
 interface MessageListProps {
   messages: Message[]
@@ -79,8 +81,30 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   const regenerateResponse = async (messageId: string) => {
-    // TODO: Implement regenerate functionality
-    toast.info('Функция регенерации будет добавлена')
+    try {
+      const response = await fetch('/api/messages/regenerate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ messageId })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Ошибка регенерации')
+      }
+
+      const newMessage = await response.json()
+      
+      // Добавляем новое сообщение в список
+      // TODO: Обновить состояние сообщений в контексте
+      toast.success('Ответ регенерирован успешно')
+      
+    } catch (error) {
+      console.error('Error regenerating message:', error)
+      toast.error(error instanceof Error ? error.message : 'Ошибка регенерации сообщения')
+    }
   }
 
   const formatMessageContent = (content: string) => {
@@ -138,7 +162,11 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                 <AvatarImage src={message.role === 'user' ? undefined : '/bot-avatar.png'} />
                 <AvatarFallback>
                   {message.role === 'user' ? (
-                    <User className="w-4 h-4" />
+                    message.audioUrl ? (
+                      <Mic className="w-4 h-4" />
+                    ) : (
+                      <User className="w-4 h-4" />
+                    )
                   ) : (
                     <Bot className="w-4 h-4" />
                   )}
@@ -166,6 +194,23 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                       />
                     </div>
                   )}
+
+    {message.audioUrl && (
+      <div className="mb-3">
+        <AudioPlayer
+          audioUrl={message.audioUrl}
+          transcription={message.audioTranscription}
+          duration={message.audioDuration}
+        />
+      </div>
+    )}
+
+    {/* Function Calls для API v2.0.0 */}
+    {message.functionCalls && message.functionCalls.length > 0 && (
+      <div className="mb-3">
+        <FunctionCallDisplay functionCalls={message.functionCalls} />
+      </div>
+    )}
                   
                   {editingMessageId === message.id ? (
                     <div className="space-y-2">

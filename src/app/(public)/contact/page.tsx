@@ -350,7 +350,7 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Отправьте нам сообщение с темой "Партнёрство", и мы обсудим возможности сотрудничества.
+                    Отправьте нам сообщение с темой &quot;Партнёрство&quot;, и мы обсудим возможности сотрудничества.
                   </p>
                 </CardContent>
               </Card>

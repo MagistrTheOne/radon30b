@@ -20,6 +20,19 @@ export interface Message {
   role: 'user' | 'assistant'
   content: string
   imageUrl?: string
+  audioUrl?: string
+  audioTranscription?: string
+  audioDuration?: number
+  // New fields for API v2.0.0
+  functionCalls?: Array<{
+    name: string
+    arguments: Record<string, unknown>
+    result?: unknown
+    status?: 'pending' | 'success' | 'error'
+    execution_time?: number
+  }>
+  personalityUsed?: string
+  conversationId?: string
   createdAt: Date
   editedAt?: Date
   isEdited?: boolean
@@ -39,6 +52,7 @@ export interface CreateChatRequest {
 export interface SendMessageRequest {
   content: string
   imageUrl?: string
+  audioFile?: File
 }
 
 export interface ChatResponse {
@@ -46,6 +60,7 @@ export interface ChatResponse {
   title: string
   createdAt: string
   messageCount: number
+  messages?: MessageResponse[]
 }
 
 export interface MessageResponse {
@@ -53,6 +68,19 @@ export interface MessageResponse {
   role: 'user' | 'assistant'
   content: string
   imageUrl?: string
+  audioUrl?: string
+  audioTranscription?: string
+  audioDuration?: number
+  // New fields for API v2.0.0
+  functionCalls?: Array<{
+    name: string
+    arguments: Record<string, unknown>
+    result?: unknown
+    status?: 'pending' | 'success' | 'error'
+    execution_time?: number
+  }>
+  personalityUsed?: string
+  conversationId?: string
   createdAt: string
   editedAt?: string
   isEdited?: boolean

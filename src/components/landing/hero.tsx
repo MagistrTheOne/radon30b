@@ -52,7 +52,7 @@ export function Hero() {
             className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
           >
             Мощная российская нейросеть от <span className="font-semibold text-foreground">MagistrTheOne</span> для генерации текста, 
-            анализа изображений и создания кода. Опыт ChatGPT с российскими корнями.
+            анализа изображений и создания кода с российскими корнями.
           </motion.p>
 
           {/* CTA Buttons */}

@@ -56,7 +56,7 @@ export function RenameChatDialog({
           <DialogHeader>
             <DialogTitle>Переименовать чат</DialogTitle>
             <DialogDescription>
-              Введите новое название для чата "{chat?.title}"
+              Введите новое название для чата &quot;{chat?.title}&quot;
             </DialogDescription>
           </DialogHeader>
           

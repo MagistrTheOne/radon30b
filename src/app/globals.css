@@ -129,7 +129,405 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    /* Поддержка всех экранов */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    /* Улучшенная поддержка мобильных устройств */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Предотвращение горизонтального скролла */
+    overflow-x: hidden;
+    /* Поддержка безопасных зон на мобильных */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Поддержка различных разрешений экранов */
+  @media (max-width: 320px) {
+    /* Очень маленькие экраны (старые iPhone) */
+    body {
+      font-size: 14px;
+    }
+  }
+  
+  @media (min-width: 321px) and (max-width: 480px) {
+    /* Маленькие мобильные экраны */
+    body {
+      font-size: 15px;
+    }
+  }
+  
+  @media (min-width: 481px) and (max-width: 768px) {
+    /* Планшеты в портретной ориентации */
+    body {
+      font-size: 16px;
+    }
+  }
+  
+  @media (min-width: 769px) and (max-width: 1024px) {
+    /* Планшеты в альбомной ориентации */
+    body {
+      font-size: 16px;
+    }
+  }
+  
+  @media (min-width: 1025px) and (max-width: 1440px) {
+    /* Ноутбуки и маленькие десктопы */
+    body {
+      font-size: 16px;
+    }
+  }
+  
+  @media (min-width: 1441px) and (max-width: 1920px) {
+    /* Большие мониторы */
+    body {
+      font-size: 17px;
+    }
+  }
+  
+  @media (min-width: 1921px) {
+    /* Очень большие мониторы (4K и выше) */
+    body {
+      font-size: 18px;
+    }
+  }
+  
+  /* Поддержка высоких DPI экранов */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  }
+  
+  /* Поддержка темной темы на системном уровне */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+    }
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+    }
+  }
+  
+  /* Поддержка уменьшенной анимации */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* Поддержка высокого контраста */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: #ffffff;
+      --ring: #ffffff;
+    }
+  }
+  
+  /* Улучшенная поддержка touch устройств */
+  @media (hover: none) and (pointer: coarse) {
+    /* Увеличиваем размеры кликабельных элементов на touch устройствах */
+    button, 
+    [role="button"], 
+    input[type="button"], 
+    input[type="submit"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+  
+  /* Поддержка различных ориентаций */
+  @media (orientation: landscape) and (max-height: 500px) {
+    /* Ландшафтная ориентация на мобильных */
+    body {
+      font-size: 14px;
+    }
+  }
+  
+  /* Поддержка печати */
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+  }
+}
+
+/* Дополнительные утилитарные классы для адаптивности */
+@layer utilities {
+  /* Контейнеры для разных экранов */
+  .container-responsive {
+    @apply w-full mx-auto px-4;
+  }
+  
+  @media (min-width: 640px) {
+    .container-responsive {
+      @apply px-6;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      @apply px-8;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .container-responsive {
+      @apply px-12;
+    }
+  }
+  
+  /* Адаптивные размеры текста */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-2xl sm:text-3xl;
+  }
+  
+  .text-responsive-3xl {
+    @apply text-3xl sm:text-4xl;
+  }
+  
+  /* Адаптивные отступы */
+  .p-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+  
+  .px-responsive {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .py-responsive {
+    @apply py-4 sm:py-6 lg:py-8;
+  }
+  
+  .m-responsive {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+  
+  .mx-responsive {
+    @apply mx-4 sm:mx-6 lg:mx-8;
+  }
+  
+  .my-responsive {
+    @apply my-4 sm:my-6 lg:my-8;
+  }
+  
+  /* Адаптивные сетки */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6;
+  }
+  
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  }
+  
+  /* Адаптивные flex контейнеры */
+  .flex-responsive {
+    @apply flex flex-col sm:flex-row gap-4 sm:gap-6;
+  }
+  
+  .flex-responsive-reverse {
+    @apply flex flex-col-reverse sm:flex-row gap-4 sm:gap-6;
+  }
+  
+  /* Адаптивные размеры кнопок */
+  .btn-responsive {
+    @apply px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base;
+  }
+  
+  .btn-responsive-lg {
+    @apply px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg;
+  }
+  
+  /* Адаптивные карточки */
+  .card-responsive {
+    @apply p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl;
+  }
+  
+  /* Адаптивные изображения */
+  .img-responsive {
+    @apply w-full h-auto object-cover;
+  }
+  
+  /* Адаптивные модальные окна */
+  .modal-responsive {
+    @apply w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl mx-4;
+  }
+  
+  /* Адаптивные сайдбары */
+  .sidebar-responsive {
+    @apply w-full sm:w-64 lg:w-72 xl:w-80;
+  }
+  
+  /* Адаптивные формы */
+  .form-responsive {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .input-responsive {
+    @apply w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base;
+  }
+  
+  /* Адаптивные таблицы */
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+  }
+  
+  .table-responsive table {
+    @apply min-w-full;
+  }
+  
+  /* Адаптивные навигации */
+  .nav-responsive {
+    @apply flex flex-col sm:flex-row gap-2 sm:gap-4;
+  }
+  
+  /* Адаптивные списки */
+  .list-responsive {
+    @apply space-y-2 sm:space-y-3 lg:space-y-4;
+  }
+  
+  /* Адаптивные заголовки */
+  .heading-responsive {
+    @apply text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold;
+  }
+  
+  .subheading-responsive {
+    @apply text-lg sm:text-xl lg:text-2xl xl:text-3xl font-semibold;
+  }
+  
+  /* Адаптивные иконки */
+  .icon-responsive {
+    @apply w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6;
+  }
+  
+  .icon-responsive-lg {
+    @apply w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10;
+  }
+  
+  /* Адаптивные анимации */
+  .animate-responsive {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Адаптивные тени */
+  .shadow-responsive {
+    @apply shadow-sm sm:shadow-md lg:shadow-lg;
+  }
+  
+  /* Адаптивные границы */
+  .border-responsive {
+    @apply border border-border rounded-md sm:rounded-lg;
+  }
+  
+  /* Адаптивные фоны */
+  .bg-responsive {
+    @apply bg-background/95 backdrop-blur-sm sm:backdrop-blur-md;
+  }
+  
+  /* Адаптивные z-index */
+  .z-responsive {
+    @apply z-10 sm:z-20 lg:z-30;
+  }
+  
+  /* Адаптивные позиционирования */
+  .fixed-responsive {
+    @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8;
+  }
+  
+  /* Адаптивные скрытия */
+  .hidden-mobile {
+    @apply hidden sm:block;
+  }
+  
+  .hidden-desktop {
+    @apply block sm:hidden;
+  }
+  
+  .hidden-tablet {
+    @apply block lg:hidden;
+  }
+  
+  /* Адаптивные отображения */
+  .block-mobile {
+    @apply block sm:hidden;
+  }
+  
+  .block-desktop {
+    @apply hidden sm:block;
+  }
+  
+  .block-tablet {
+    @apply hidden lg:block;
+  }
+  
+  /* Адаптивные размеры */
+  .w-responsive {
+    @apply w-full sm:w-auto;
+  }
+  
+  .h-responsive {
+    @apply h-auto sm:h-full;
+  }
+  
+  .min-h-responsive {
+    @apply min-h-screen sm:min-h-0;
+  }
+  
+  /* Адаптивные overflow */
+  .overflow-responsive {
+    @apply overflow-hidden sm:overflow-visible;
+  }
+  
+  .overflow-x-responsive {
+    @apply overflow-x-auto sm:overflow-x-visible;
+  }
+  
+  .overflow-y-responsive {
+    @apply overflow-y-auto sm:overflow-y-visible;
   }
 }

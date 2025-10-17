@@ -1,159 +1,94 @@
-"use client"
+import { Loader2, Bot } from 'lucide-react'
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
+interface LoadingIndicatorProps {
+  text?: string
+  size?: 'sm' | 'md' | 'lg'
+}
 
-// Скелетон для списка чатов
-export function ChatListSkeleton() {
+export function LoadingIndicator({ text = 'Загрузка...', size = 'md' }: LoadingIndicatorProps) {
+  const sizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8'
+  }
+
   return (
-    <div className="space-y-2">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 rounded-lg">
-          <Skeleton className="w-8 h-8 rounded-full" />
-          <div className="flex-1 space-y-1">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
-        </div>
-      ))}
+    <div className="flex items-center gap-3">
+      <Loader2 className={`${sizeClasses[size]} animate-spin text-muted-foreground`} />
+      <span className="text-muted-foreground">{text}</span>
     </div>
   )
 }
 
-// Скелетон для сообщений
-export function MessageSkeleton() {
-  return (
-    <div className="flex gap-4">
-      <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
-      <div className="flex-1 space-y-2">
-        <Skeleton className="h-4 w-1/4" />
-        <div className="space-y-1">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Скелетон для списка сообщений
 export function MessageListSkeleton() {
   return (
-    <div className="space-y-6">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <MessageSkeleton key={i} />
+    <div className="space-y-6 p-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="flex gap-4">
+          <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+            <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+          </div>
+        </div>
       ))}
     </div>
   )
 }
 
-// Индикатор загрузки с текстом
-export function LoadingIndicator({ text = "Загрузка..." }: { text?: string }) {
+export function TypingIndicator() {
   return (
-    <div className="flex items-center justify-center gap-2 p-4">
-      <Loader2 className="w-4 h-4 animate-spin" />
-      <span className="text-sm text-muted-foreground">{text}</span>
-    </div>
-  )
-}
-
-// Скелетон для карточек настроек
-export function SettingsCardSkeleton() {
-  return (
-    <Card>
-      <div className="p-6 space-y-4">
-        <div className="space-y-2">
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-3 w-3/4" />
-              </div>
-              <Skeleton className="h-6 w-12 rounded-full" />
+    <div className="flex gap-4">
+      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+        <Bot className="w-4 h-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        <div className="bg-muted p-4 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-          ))}
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-// Скелетон для профиля
-export function ProfileSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <Skeleton className="w-24 h-24 rounded-full mx-auto mb-4" />
-        <Skeleton className="h-6 w-32 mx-auto mb-2" />
-        <Skeleton className="h-4 w-48 mx-auto" />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-10 w-full" />
+            <span className="text-sm text-muted-foreground">Radon AI печатает...</span>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   )
 }
 
-// Скелетон для тарифных планов
-export function PricingCardSkeleton() {
+export function ErrorState({ error, onRetry }: { error: string; onRetry?: () => void }) {
   return (
-    <Card className="h-full">
-      <div className="p-6 space-y-4">
-        <div className="text-center space-y-2">
-          <Skeleton className="h-6 w-20 mx-auto" />
-          <Skeleton className="h-8 w-24 mx-auto" />
-          <Skeleton className="h-4 w-32 mx-auto" />
-        </div>
-        
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <Skeleton className="w-4 h-4 rounded-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          ))}
-        </div>
-        
-        <Skeleton className="h-10 w-full" />
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+        <Bot className="w-6 h-6 text-destructive" />
       </div>
-    </Card>
+      <h3 className="text-lg font-semibold mb-2">Ошибка</h3>
+      <p className="text-muted-foreground mb-4 max-w-md">{error}</p>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Попробовать снова
+        </button>
+      )}
+    </div>
   )
 }
 
-// Компонент для отображения пустого состояния
-export function EmptyState({ 
-  icon: Icon, 
-  title, 
-  description, 
-  action 
-}: { 
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  description: string
-  action?: React.ReactNode
-}) {
+export function EmptyState() {
   return (
-    <div className="text-center py-12">
-      <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground">
-        <Icon className="w-full h-full" />
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+        <Bot className="w-6 h-6 text-primary" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-        {description}
+      <h3 className="text-lg font-semibold mb-2">Добро пожаловать в Radon AI</h3>
+      <p className="text-muted-foreground max-w-md">
+        Начните разговор, задав вопрос или загрузив изображение. 
+        Radon AI готов помочь вам с любыми задачами!
       </p>
-      {action}
     </div>
   )
 }

@@ -99,7 +99,7 @@ export default function GdprPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Удалите ваши персональные данные ("право на забвение")
+                    Удалите ваши персональные данные (&quot;право на забвение&quot;)
                   </p>
                   <Button variant="outline" className="w-full">
                     <Trash2 className="w-4 h-4 mr-2" />

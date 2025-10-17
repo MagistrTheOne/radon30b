@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 interface ErrorBoundaryState {
@@ -41,40 +40,44 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-destructive" />
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="max-w-md w-full mx-auto p-6">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <AlertTriangle className="h-12 w-12 text-destructive" />
               </div>
-              <CardTitle>Что-то пошло не так</CardTitle>
-              <CardDescription>
-                Произошла неожиданная ошибка. Попробуйте обновить страницу.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              
+              <div className="space-y-2">
+                <h1 className="text-2xl font-bold text-foreground">
+                  Что-то пошло не так
+                </h1>
+                <p className="text-muted-foreground">
+                  Произошла неожиданная ошибка. Попробуйте обновить страницу.
+                </p>
+              </div>
+
               {this.state.error && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-mono text-muted-foreground">
+                <details className="text-left bg-muted p-4 rounded-lg">
+                  <summary className="cursor-pointer font-medium">
+                    Детали ошибки
+                  </summary>
+                  <pre className="mt-2 text-sm text-muted-foreground overflow-auto">
                     {this.state.error.message}
-                  </p>
-                </div>
+                  </pre>
+                </details>
               )}
-              <div className="flex gap-2">
-                <Button onClick={this.resetError} className="flex-1">
-                  <RefreshCw className="w-4 h-4 mr-2" />
+
+              <div className="flex gap-3 justify-center">
+                <Button onClick={this.resetError} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
                   Попробовать снова
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.reload()}
-                  className="flex-1"
-                >
+                <Button onClick={() => window.location.reload()}>
                   Обновить страницу
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )
     }
@@ -83,16 +86,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 }
 
-// Функциональный компонент для использования в функциональных компонентах
-export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  fallback?: React.ComponentType<{ error?: Error; resetError: () => void }>
-) {
-  return function WrappedComponent(props: P) {
-    return (
-      <ErrorBoundary fallback={fallback}>
-        <Component {...props} />
-      </ErrorBoundary>
-    )
-  }
+// Функциональный компонент для простых случаев
+export function SimpleErrorBoundary({ children }: { children: React.ReactNode }) {
+  return (
+    <ErrorBoundary>
+      {children}
+    </ErrorBoundary>
+  )
 }

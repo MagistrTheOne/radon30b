@@ -21,7 +21,7 @@ interface ChatContextType {
   selectChat: (chatId: string) => Promise<void>
   
   // Сообщения
-  sendMessage: (content: string, imageUrl?: string) => Promise<void>
+  sendMessage: (content: string, imageUrl?: string, audioFile?: File) => Promise<void>
   editMessage: (messageId: string, content: string) => Promise<void>
   deleteMessage: (messageId: string) => Promise<void>
   
@@ -51,19 +51,41 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   const loadChats = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await chatApi.getChats()
-      setChats(response.data)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки чатов'
-      setError(errorMessage)
-      console.error('Error loading chats:', error)
-      toast.error(errorMessage)
-    } finally {
-      setLoading(false)
+    const maxRetries = 3
+    let lastError: Error | null = null
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await chatApi.getChats()
+        setChats(response.data)
+        
+        if (attempt > 1) {
+          toast.success('Чаты загружены после повторной попытки')
+        }
+        return
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error')
+        
+        if (attempt === maxRetries) {
+          break
+        }
+        
+        toast.warning(`Попытка ${attempt} из ${maxRetries} неудачна. Повторяем...`)
+        const delay = Math.pow(2, attempt - 1) * 1000
+        await new Promise(resolve => setTimeout(resolve, delay))
+      } finally {
+        setLoading(false)
+      }
     }
+
+    // Все попытки неудачны
+    const errorMessage = lastError?.message || 'Ошибка загрузки чатов'
+    setError(errorMessage)
+    console.error('Error loading chats after retries:', lastError)
+    toast.error(`Не удалось загрузить чаты: ${errorMessage}`)
   }
 
   const clearError = () => {
@@ -189,7 +211,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const sendMessage = async (content: string, imageUrl?: string) => {
+  const sendMessage = async (content: string, imageUrl?: string, audioFile?: File) => {
     if (!currentChat) {
       toast.error('Выберите чат')
       return
@@ -201,36 +223,64 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       role: 'user',
       content,
       imageUrl,
+      audioUrl: audioFile ? URL.createObjectURL(audioFile) : undefined,
       createdAt: new Date().toISOString()
     }
 
     // Оптимистичное обновление
     setMessages(prev => [...prev, userMessage])
     
-    try {
-      const response = await chatApi.sendMessage(currentChat.id, content, imageUrl)
-      const aiMessage = response.data
-      
-      // Заменить временное сообщение на реальное + добавить ответ AI
-      setMessages(prev => {
-        const filtered = prev.filter(msg => msg.id !== tempMessageId)
-        return [...filtered, userMessage, aiMessage]
-      })
-      
-      // Обновить счетчик сообщений в чате
-      setChats(prev => prev.map(chat => 
-        chat.id === currentChat.id 
-          ? { ...chat, messageCount: chat.messageCount + 2 }
-          : chat
-      ))
-    } catch (error) {
-      // Откатить изменения
-      setMessages(prev => prev.filter(msg => msg.id !== tempMessageId))
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка отправки сообщения'
-      setError(errorMessage)
-      console.error('Error sending message:', error)
-      toast.error(errorMessage)
+    // Retry logic с exponential backoff
+    const maxRetries = 3
+    let lastError: Error | null = null
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await chatApi.sendMessage(currentChat.id, content, imageUrl, audioFile)
+        const aiMessage = response.data
+        
+        // Заменить временное сообщение на реальное + добавить ответ AI
+        setMessages(prev => {
+          const filtered = prev.filter(msg => msg.id !== tempMessageId)
+          return [...filtered, userMessage, aiMessage]
+        })
+        
+        // Обновить счетчик сообщений в чате
+        setChats(prev => prev.map(chat => 
+          chat.id === currentChat.id 
+            ? { ...chat, messageCount: chat.messageCount + 2 }
+            : chat
+        ))
+
+        // Успех - выходим из цикла
+        if (attempt > 1) {
+          toast.success('Сообщение отправлено после повторной попытки')
+        }
+        return
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error')
+        
+        if (attempt === maxRetries) {
+          // Последняя попытка неудачна
+          break
+        }
+        
+        // Показать уведомление о повторной попытке
+        toast.warning(`Попытка ${attempt} из ${maxRetries} неудачна. Повторяем...`)
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, attempt - 1) * 1000
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
     }
+
+    // Все попытки неудачны - откатить изменения
+    setMessages(prev => prev.filter(msg => msg.id !== tempMessageId))
+    const errorMessage = lastError?.message || 'Ошибка отправки сообщения'
+    setError(errorMessage)
+    console.error('Error sending message after retries:', lastError)
+    toast.error(`Не удалось отправить сообщение: ${errorMessage}`)
   }
 
   const editMessage = async (messageId: string, content: string) => {

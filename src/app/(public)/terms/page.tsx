@@ -191,7 +191,7 @@ export default function TermsPage() {
                   <div>
                     <h4 className="font-semibold mb-2">Ограничение ответственности:</h4>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Сервис предоставляется "как есть"</li>
+                      <li>Сервис предоставляется &quot;как есть&quot;</li>
                       <li>Мы не гарантируем точность генерируемого контента</li>
                       <li>Ответственность за использование контента лежит на пользователе</li>
                       <li>Максимальная ответственность ограничена суммой оплаты</li>

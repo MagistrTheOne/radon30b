@@ -1,6 +1,7 @@
 import { Header } from '@/components/landing/header'
 import { Footer } from '@/components/landing/footer'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -14,7 +15,10 @@ import {
   FileText,
   Play,
   Download,
-  ExternalLink
+  ExternalLink,
+  Clock,
+  Image,
+  MessageSquare
 } from 'lucide-react'
 
 export default function DocsPage() {

@@ -1,16 +1,11 @@
 "use client"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Message, MessageEdit } from '@/types/chat'
-import { format } from 'date-fns'
+import { Message } from '@/types/chat'
+import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 interface MessageHistoryDialogProps {
@@ -19,73 +14,81 @@ interface MessageHistoryDialogProps {
   message: Message | null
 }
 
-export function MessageHistoryDialog({ 
-  open, 
-  onOpenChange, 
-  message 
-}: MessageHistoryDialogProps) {
-  // TODO: Загружать реальную историю изменений с сервера
-  const mockEdits: MessageEdit[] = [
-    {
-      id: '1',
-      messageId: message?.id || '',
-      previousContent: 'Первоначальная версия сообщения',
-      editedAt: new Date(Date.now() - 3600000) // 1 час назад
-    },
-    {
-      id: '2', 
-      messageId: message?.id || '',
-      previousContent: 'Вторая версия с небольшими изменениями',
-      editedAt: new Date(Date.now() - 1800000) // 30 минут назад
+export function MessageHistoryDialog({ open, onOpenChange, message }: MessageHistoryDialogProps) {
+  const [editHistory, setEditHistory] = useState<{ id: string; previousContent: string; editedAt: Date }[]>([])
+
+  useEffect(() => {
+    if (message && open) {
+      loadMessageHistory()
     }
-  ]
+  }, [message, open])
+
+  const loadMessageHistory = async () => {
+    if (!message) return
+
+    try {
+      const response = await fetch(`/api/messages/${message.id}/history`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки истории')
+      }
+
+      const data = await response.json()
+      setEditHistory(data.editHistory || [])
+    } catch (error) {
+      console.error('Error loading message history:', error)
+      setEditHistory([])
+    }
+  }
 
   if (!message) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>История изменений</DialogTitle>
-          <DialogDescription>
-            История редактирования сообщения
-          </DialogDescription>
+          <DialogTitle>История редактирования сообщения</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Текущая версия */}
           <div className="p-4 border rounded-lg bg-muted/50">
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">Текущая версия</Badge>
+              <Badge variant="default">Текущая версия</Badge>
               <span className="text-sm text-muted-foreground">
-                {format(new Date(), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true, locale: ru })}
               </span>
             </div>
-            <div className="text-sm whitespace-pre-wrap">
-              {message.content}
-            </div>
+            <p className="text-sm">{message.content}</p>
           </div>
 
-          {/* История изменений */}
-          <ScrollArea className="max-h-[400px]">
-            <div className="space-y-4">
-              {mockEdits.map((edit, index) => (
+          {/* История редактирования */}
+          <ScrollArea className="max-h-96">
+            <div className="space-y-3">
+              {editHistory.map((edit, index) => (
                 <div key={edit.id} className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline">
-                      Версия {mockEdits.length - index}
-                    </Badge>
+                    <Badge variant="outline">Версия {editHistory.length - index}</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {format(edit.editedAt, 'dd.MM.yyyy HH:mm', { locale: ru })}
+                      {formatDistanceToNow(new Date(edit.editedAt), { addSuffix: true, locale: ru })}
                     </span>
                   </div>
-                  <div className="text-sm whitespace-pre-wrap text-muted-foreground">
-                    {edit.previousContent}
-                  </div>
+                  <p className="text-sm">{edit.previousContent}</p>
                 </div>
               ))}
             </div>
           </ScrollArea>
+
+          {editHistory.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              История редактирования пуста
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
