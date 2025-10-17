@@ -20,3 +20,7 @@ class User(Base):
 
     # Relationships
     chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
+    subscription = relationship("Subscription", back_populates="user", uselist=False)
+    usage_logs = relationship("UsageLog", back_populates="user", cascade="all, delete-orphan")
+    owned_teams = relationship("Team", back_populates="owner", cascade="all, delete-orphan")
+    team_memberships = relationship("TeamMember", back_populates="user", cascade="all, delete-orphan")

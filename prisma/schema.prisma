@@ -17,6 +17,10 @@ model User {
   subscriptionTier String  @default("free")
   createdAt       DateTime @default(now())
   chats           Chat[]
+  subscription    Subscription?
+  usageLogs       UsageLog[]
+  ownedTeams      Team[]       @relation("TeamOwner")
+  teamMemberships TeamMember[]
 }
 
 model Chat {
@@ -35,5 +39,77 @@ model Message {
   content   String   @db.Text
   imageUrl  String?
   createdAt DateTime @default(now())
+  editedAt  DateTime?
+  isEdited  Boolean  @default(false)
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  edits     MessageEdit[]
+}
+
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  tier              String   @default("free") // free, pro, team, enterprise
+  status            String   @default("active") // active, cancelled, expired
+  currentPeriodEnd  DateTime?
+  stripeCustomerId  String?  @unique
+  stripeSubscriptionId String? @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // message, api_call, image_analysis
+  count     Int      @default(1)
+  date      DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  @@index([userId, date])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  ownerId     String
+  maxUsers    Int      @default(10)
+  createdAt   DateTime @default(now())
+  
+  owner       User     @relation("TeamOwner", fields: [ownerId], references: [id])
+  members     TeamMember[]
+  workspaces  Workspace[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      String   @default("member") // admin, member
+  createdAt DateTime @default(now())
+  
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([teamId, userId])
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  teamId      String
+  name        String
+  createdAt   DateTime @default(now())
+  
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  chats       Chat[]
+}
+
+model MessageEdit {
+  id              String   @id @default(cuid())
+  messageId       String
+  previousContent String   @db.Text
+  editedAt        DateTime @default(now())
+  
+  message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }

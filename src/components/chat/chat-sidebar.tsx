@@ -15,7 +15,9 @@ import {
   Zap,
   Settings,
   LogOut,
-  User
+  User,
+  Users,
+  BarChart3
 } from 'lucide-react'
 import { 
   DropdownMenu, 
@@ -254,24 +256,36 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Настройки
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/subscription">
-                  <Crown className="w-4 h-4 mr-2" />
-                  Управление подпиской
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <User className="w-4 h-4 mr-2" />
-                  Профиль
-                </Link>
-              </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <Settings className="w-4 h-4 mr-2" />
+                Настройки
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/subscription">
+                <Crown className="w-4 h-4 mr-2" />
+                Управление подпиской
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/team">
+                <Users className="w-4 h-4 mr-2" />
+                Команды
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/analytics">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Аналитика
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/profile">
+                <User className="w-4 h-4 mr-2" />
+                Профиль
+              </Link>
+            </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 <LogOut className="w-4 h-4 mr-2" />
                 Выйти

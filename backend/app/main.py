@@ -35,10 +35,11 @@ app.add_middleware(
 )
 
 # Include routers
-from app.routers import chat, auth
+from app.routers import chat, auth, subscription
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
+app.include_router(subscription.router, prefix="/api", tags=["subscription"])
 
 @app.get("/")
 async def root():

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Check, Star, Zap, Crown } from 'lucide-react'
+import { Check, Star, Zap, Crown, Building2 } from 'lucide-react'
 import Link from 'next/link'
 
 const plans = [
@@ -34,7 +34,7 @@ const plans = [
     name: "Pro",
     price: "19",
     period: "в месяц",
-    description: "Для профессионалов и команд",
+    description: "Для профессионалов",
     icon: Star,
     badge: "Популярный",
     features: [
@@ -44,12 +44,33 @@ const plans = [
       "Расширенная история",
       "Экспорт чатов",
       "Приоритетная поддержка",
-      "API доступ"
+      "API доступ (10K req/день)"
     ],
     limitations: [],
     cta: "Начать Pro",
     href: "/sign-up?plan=pro",
     popular: true
+  },
+  {
+    name: "Team",
+    price: "99",
+    period: "в месяц",
+    description: "Для команд до 10 участников",
+    icon: Building2,
+    badge: null,
+    features: [
+      "Всё из Pro",
+      "Shared workspaces",
+      "Team management",
+      "Centralized billing",
+      "Role-based access",
+      "Team analytics",
+      "API доступ (100K req/день)"
+    ],
+    limitations: [],
+    cta: "Начать Team",
+    href: "/sign-up?plan=team",
+    popular: false
   },
   {
     name: "Enterprise",
@@ -94,7 +115,7 @@ export function Pricing() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
