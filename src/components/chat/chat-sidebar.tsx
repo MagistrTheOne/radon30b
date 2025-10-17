@@ -14,7 +14,8 @@ import {
   Crown,
   Zap,
   Settings,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react'
 import { 
   DropdownMenu, 
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useUser, UserButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { ChatResponse } from '@/types/chat'
@@ -280,23 +282,23 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
-                <Settings className="w-4 h-4 mr-2" />
-                Настройки
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Настройки
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Crown className="w-4 h-4 mr-2" />
-                Управление подпиской
+              <DropdownMenuItem asChild>
+                <Link href="/subscription">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Управление подпиской
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-6 h-6"
-                    }
-                  }}
-                />
-                <span className="ml-2">Профиль</span>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="w-4 h-4 mr-2" />
+                  Профиль
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 <LogOut className="w-4 h-4 mr-2" />
