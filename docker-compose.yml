@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  # Redis for Pub/Sub and Caching
+  redis:
+    image: redis:alpine
+    container_name: radonai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -19,25 +33,100 @@ services:
       timeout: 5s
       retries: 5
 
-  # FastAPI Backend
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: radonai-backend
-    environment:
-      - DATABASE_URL=postgresql://radonai:radonai_password@postgres:5432/radonai
-      - RADON_AI_API_KEY=${RADON_AI_API_KEY}
-      - RADON_AI_API_URL=${RADON_AI_API_URL}
-      - ENVIRONMENT=development
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: radonai-api-gateway
     ports:
       - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - CHAT_SERVICE_URL=http://chat-service:8002
+      - AI_SERVICE_URL=http://ai-service:8001
+      - USER_SERVICE_URL=http://user-service:8003
+      - SUBSCRIPTION_SERVICE_URL=http://subscription-service:8004
+      - FILE_SERVICE_URL=http://file-service:8005
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
     depends_on:
-      postgres:
-        condition: service_healthy
+      - redis
+      - postgres
+      - chat-service
+      - ai-service
+      - user-service
+      - subscription-service
+      - file-service
+
+  # AI Service
+  ai-service:
+    build: ./services/ai-service
+    container_name: radonai-ai-service
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=development
+      - RADON_API_URL=http://213.219.215.235:8000
+      - RADON_API_KEY=${RADON_API_KEY}
+    depends_on:
+      - redis
+
+  # Chat Service
+  chat-service:
+    build: ./services/chat-service
+    container_name: radonai-chat-service
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=development
+      - AI_SERVICE_URL=http://ai-service:8001
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - postgres
+      - ai-service
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    container_name: radonai-user-service
+    ports:
+      - "8003:8003"
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - postgres
+
+  # Subscription Service
+  subscription-service:
+    build: ./services/subscription-service
+    container_name: radonai-subscription-service
+    ports:
+      - "8004:8004"
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      - redis
+      - postgres
+
+  # File Service
+  file-service:
+    build: ./services/file-service
+    container_name: radonai-file-service
+    ports:
+      - "8005:8005"
+    environment:
+      - ENVIRONMENT=development
+      - UPLOAD_DIR=/app/uploads
+      - MAX_FILE_SIZE=52428800
+      - REDIS_URL=redis://redis:6379
     volumes:
-      - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - file_uploads:/app/uploads
+    depends_on:
+      - redis
 
   # Next.js Frontend
   frontend:
@@ -53,7 +142,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      - api-gateway
     volumes:
       - .:/app
       - /app/node_modules
@@ -61,3 +150,5 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+  file_uploads:
