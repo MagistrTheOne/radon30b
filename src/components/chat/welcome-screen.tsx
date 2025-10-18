@@ -24,15 +24,15 @@ export function WelcomeScreen() {
   }, [currentIndex, fullText])
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4">
+    <div className="flex flex-col items-center justify-center h-full px-4 py-8">
       {/* Radon Icon */}
       <motion.div
-        className="w-16 h-16 mb-6 rounded-full bg-[#2f2f2f]/80 border border-[#404040] flex items-center justify-center backdrop-blur-md shadow-lg"
+        className="w-16 h-16 sm:w-20 sm:h-20 mb-6 rounded-full bg-[#2f2f2f]/80 border border-[#404040] flex items-center justify-center backdrop-blur-md shadow-lg"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <Bot className="w-8 h-8 text-[#10a37f]" />
+        <Bot className="w-8 h-8 sm:w-10 sm:h-10 text-[#10a37f]" />
       </motion.div>
 
       {/* Welcome Text */}
@@ -42,11 +42,11 @@ export function WelcomeScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
       >
-        <h1 className="text-2xl font-semibold text-white mb-2">
+        <h1 className="text-xl sm:text-2xl font-semibold text-white mb-2">
           Добро пожаловать в Radon AI
         </h1>
         
-        <div className="text-lg text-[#8e8ea0] min-h-[1.5rem]">
+        <div className="text-base sm:text-lg text-[#8e8ea0] min-h-[1.5rem]">
           <span className="font-medium text-[#10a37f]">{displayedText}</span>
           {currentIndex < fullText.length && (
             <motion.span

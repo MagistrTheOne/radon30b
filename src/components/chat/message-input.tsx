@@ -266,7 +266,8 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
             onKeyDown={handleKeyDown}
             placeholder="Сообщение Radon AI..."
             className={cn(
-              "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-[#2f2f2f]/80 backdrop-blur-md border-[#404040] text-white placeholder:text-[#8e8ea0] focus:border-[#10a37f] focus:ring-[#10a37f] transition-all duration-300 shadow-lg",
+              "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-[#2f2f2f]/80 backdrop-blur-md border-[#404040] text-white placeholder:text-[#8e8ea0] focus:border-[#10a37f] focus:ring-[#10a37f] transition-all duration-300 shadow-lg touch-manipulation",
+              "text-base sm:text-sm", // Увеличиваем размер текста на мобильных
               imageFile || audioBlob ? "border-[#10a37f] focus:ring-[#10a37f] shadow-[0_0_20px_rgba(16,163,127,0.3)]" : ""
             )}
             disabled={isLoading}
@@ -278,19 +279,19 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 hover:bg-[#404040]/80 hover:text-white transition-all backdrop-blur-sm"
+                className="h-8 w-8 sm:h-7 sm:w-7 hover:bg-[#404040]/80 hover:text-white transition-all backdrop-blur-sm touch-manipulation"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
                 aria-label="Прикрепить изображение"
                 title="Прикрепить изображение"
               >
-                <ImageIcon className="w-3 h-3" />
+                <ImageIcon className="w-4 h-4 sm:w-3 sm:h-3" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-7 w-7 transition-all backdrop-blur-sm",
+                  "h-8 w-8 sm:h-7 sm:w-7 transition-all backdrop-blur-sm touch-manipulation",
                   isRecording ? "text-red-400 hover:text-red-300 hover:bg-red-500/20" : "hover:text-white hover:bg-[#404040]/80"
                 )}
                 onClick={handleAudioToggle}
@@ -298,17 +299,17 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 aria-label={isRecording ? "Остановить запись" : "Начать запись голоса"}
                 title={isRecording ? "Остановить запись" : "Начать запись голоса"}
               >
-                {isRecording ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
+                {isRecording ? <MicOff className="w-4 h-4 sm:w-3 sm:h-3" /> : <Mic className="w-4 h-4 sm:w-3 sm:h-3" />}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShortcutsOpen(true)}
-                className="h-7 w-7 hover:text-white hover:bg-[#404040]/80 backdrop-blur-sm transition-all"
+                className="h-8 w-8 sm:h-7 sm:w-7 hover:text-white hover:bg-[#404040]/80 backdrop-blur-sm transition-all touch-manipulation"
                 aria-label="Показать горячие клавиши"
                 title="Показать горячие клавиши"
               >
-                <HelpCircle className="w-3 h-3" />
+                <HelpCircle className="w-4 h-4 sm:w-3 sm:h-3" />
               </Button>
             </div>
 
@@ -326,7 +327,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
             disabled={!canSend || isLoading}
             size="icon"
             className={cn(
-              "h-11 w-11 rounded-xl transition-all shrink-0",
+              "h-12 w-12 sm:h-11 sm:w-11 rounded-xl transition-all shrink-0 touch-manipulation",
               canSend && !isLoading
                 ? "bg-[#10a37f] hover:bg-[#0d8f6b] text-white shadow-lg hover:shadow-xl backdrop-blur-md"
                 : "bg-[#2f2f2f]/80 text-[#8e8ea0] cursor-not-allowed backdrop-blur-sm"

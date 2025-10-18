@@ -34,7 +34,7 @@ export default function ChatLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden fixed top-4 left-4 z-50 bg-[#2f2f2f] hover:bg-[#404040] border border-[#404040] text-white"
+                className="md:hidden fixed top-4 left-4 z-50 bg-[#2f2f2f] hover:bg-[#404040] border border-[#404040] text-white min-h-[44px] min-w-[44px] touch-manipulation"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -50,15 +50,15 @@ export default function ChatLayout({
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Header */}
-            <header className="flex items-center justify-between px-4 py-3 border-b border-[#2f2f2f] bg-[#212121]">
-              <div className="flex items-center gap-3">
-                <h1 className="text-lg font-medium text-white">Radon AI</h1>
-                <span className="text-sm text-[#8e8ea0]">
+            <header className="flex items-center justify-between px-4 py-3 border-b border-[#2f2f2f] bg-[#212121] min-h-[60px]">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <h1 className="text-lg font-medium text-white truncate">Radon AI</h1>
+                <span className="text-sm text-[#8e8ea0] hidden sm:block truncate">
                   {user?.emailAddresses[0]?.emailAddress}
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <ThemeToggle />
                 <UserButtonWrapper />
               </div>

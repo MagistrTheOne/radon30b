@@ -572,3 +572,67 @@
 .chat-background {
   background: radial-gradient(circle at center, #101010, #000000 80%);
 }
+
+/* Performance optimizations */
+@layer utilities {
+  /* Hardware acceleration for smooth animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Optimized transitions */
+  .transition-optimized {
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  }
+  
+  /* Touch optimizations */
+  .touch-optimized {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .motion-reduce {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .high-contrast {
+      border: 2px solid currentColor;
+    }
+  }
+  
+  /* Focus improvements for accessibility */
+  .focus-visible {
+    outline: 2px solid #10a37f;
+    outline-offset: 2px;
+  }
+  
+  /* Scrollbar styling for webkit browsers */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #404040 transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+  }
+}

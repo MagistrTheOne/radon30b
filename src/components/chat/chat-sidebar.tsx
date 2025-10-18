@@ -124,7 +124,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
             <div className="p-4 border-b border-[#2f2f2f]">
               <Button
                 onClick={createNewChat}
-                className="w-full justify-start gap-2 bg-[#2f2f2f]/80 hover:bg-[#404040]/80 text-white border-[#404040] transition-all duration-200 backdrop-blur-md shadow-lg hover:shadow-xl"
+                className="w-full justify-start gap-2 bg-[#2f2f2f]/80 hover:bg-[#404040]/80 text-white border-[#404040] transition-all duration-200 backdrop-blur-md shadow-lg hover:shadow-xl min-h-[44px] touch-manipulation"
                 size="lg"
               >
                 <Plus className="w-4 h-4" />
@@ -143,7 +143,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
             </div>
 
             {/* Chats */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 scrollbar-thin">
               <div className="p-4 space-y-3">
                 {loading ? (
                   <MessageListSkeleton />
@@ -166,7 +166,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                           key={chat.id}
                           onClick={() => loadChat(chat.id)}
                           className={cn(
-                            "group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all",
+                            "group flex items-center gap-2 p-3 sm:p-2 rounded-lg cursor-pointer transition-all min-h-[44px] touch-manipulation",
                             "hover:bg-[#2f2f2f]/80 active:scale-[0.99] backdrop-blur-sm transition-all"
                           )}
                         >

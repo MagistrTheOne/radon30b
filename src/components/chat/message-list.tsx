@@ -144,7 +144,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   return (
-    <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-2">
+    <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-2 scrollbar-thin">
       <div className="max-w-4xl mx-auto space-y-4">
         {messages.length === 0 ? (
           <WelcomeScreen />
@@ -156,11 +156,11 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
             return (
               <motion.div
                 key={message.id}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className={cn(
-                  "flex gap-3 transition-all duration-300 group",
+                  "flex gap-3 transition-all duration-200 group",
                   isUser ? "flex-row-reverse" : "flex-row"
                 )}
               >
