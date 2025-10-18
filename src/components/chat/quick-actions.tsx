@@ -1,19 +1,19 @@
 "use client"
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { 
-  FileText, 
-  Image, 
-  Code, 
-  Mic, 
-  Languages, 
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { Card } from "@/components/ui/card"
+import {
+  FileText,
+  Image,
+  Code,
+  Mic,
+  Languages,
   BarChart3,
-  Sparkles
-} from 'lucide-react'
-import { useChatContext } from '@/contexts/ChatContext'
+  Sparkles,
+} from "lucide-react"
+import { useChatContext } from "@/contexts/ChatContext"
+import { cn } from "@/lib/utils"
 
 interface QuickAction {
   id: string
@@ -21,58 +21,58 @@ interface QuickAction {
   title: string
   description: string
   prompt: string
-  category: 'text' | 'image' | 'code' | 'audio' | 'translate' | 'analyze'
+  category: "text" | "image" | "code" | "audio" | "translate" | "analyze"
 }
 
 const quickActions: QuickAction[] = [
   {
-    id: 'text',
+    id: "text",
     icon: <FileText className="w-5 h-5" />,
-    title: 'Текст',
-    description: 'Создать контент',
-    prompt: 'Напиши интересную статью о...',
-    category: 'text'
+    title: "Текст",
+    description: "Создать контент",
+    prompt: "Напиши интересную статью о...",
+    category: "text",
   },
   {
-    id: 'image',
+    id: "image",
     icon: <Image className="w-5 h-5" />,
-    title: 'Изображение',
-    description: 'Анализ картинок',
-    prompt: 'Проанализируй это изображение и опиши что видишь',
-    category: 'image'
+    title: "Изображение",
+    description: "Анализ картинок",
+    prompt: "Проанализируй это изображение и опиши, что видишь",
+    category: "image",
   },
   {
-    id: 'code',
+    id: "code",
     icon: <Code className="w-5 h-5" />,
-    title: 'Код',
-    description: 'Программирование',
-    prompt: 'Напиши код на Python для...',
-    category: 'code'
+    title: "Код",
+    description: "Программирование",
+    prompt: "Напиши код на Python для...",
+    category: "code",
   },
   {
-    id: 'audio',
+    id: "audio",
     icon: <Mic className="w-5 h-5" />,
-    title: 'Аудио',
-    description: 'Голосовые сообщения',
-    prompt: 'Запиши голосовое сообщение',
-    category: 'audio'
+    title: "Аудио",
+    description: "Голосовые сообщения",
+    prompt: "Запиши голосовое сообщение",
+    category: "audio",
   },
   {
-    id: 'translate',
+    id: "translate",
     icon: <Languages className="w-5 h-5" />,
-    title: 'Перевод',
-    description: 'Перевести текст',
-    prompt: 'Переведи этот текст на английский:',
-    category: 'translate'
+    title: "Перевод",
+    description: "Перевести текст",
+    prompt: "Переведи этот текст на английский:",
+    category: "translate",
   },
   {
-    id: 'analyze',
+    id: "analyze",
     icon: <BarChart3 className="w-5 h-5" />,
-    title: 'Анализ',
-    description: 'Анализ данных',
-    prompt: 'Проанализируй эти данные и сделай выводы',
-    category: 'analyze'
-  }
+    title: "Анализ",
+    description: "Анализ данных",
+    prompt: "Проанализируй эти данные и сделай выводы",
+    category: "analyze",
+  },
 ]
 
 export function QuickActions() {
@@ -80,47 +80,49 @@ export function QuickActions() {
   const [hoveredAction, setHoveredAction] = useState<string | null>(null)
 
   const handleActionClick = async (action: QuickAction) => {
-    // Создаем новый чат с промптом
-    await createChat(`Новый чат - ${action.title}`)
-    
-    // TODO: Вставить промпт в поле ввода
-    // Это потребует интеграции с MessageInput компонентом
+    await createChat(`Новый чат — ${action.title}`)
+    // сюда можно будет вставить промпт в input
   }
 
-  // Адаптивное количество кнопок: 3 на мобиле, 6 на десктопе
-  const mobileActions = quickActions.slice(0, 3)
-  const desktopActions = quickActions
+  const mobile = quickActions.slice(0, 3)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="text-center">
-        <h4 className="text-sm font-medium text-muted-foreground mb-2">
+        <h4 className="text-sm font-semibold text-muted-foreground mb-1">
           Быстрые действия
         </h4>
-        <p className="text-xs text-muted-foreground">
-          Выберите тип задачи для начала работы
+        <p className="text-xs text-muted-foreground/80">
+          Выберите тип задачи, чтобы начать
         </p>
       </div>
 
-      {/* Mobile: 3 actions */}
+      {/* Mobile */}
       <div className="grid grid-cols-3 gap-3 sm:hidden">
-        {mobileActions.map((action, index) => (
+        {mobile.map((action, i) => (
           <motion.div
             key={action.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1.7 + index * 0.1 }}
+            transition={{ duration: 0.4, delay: 1.5 + i * 0.1 }}
           >
-            <Card 
-              className="p-3 cursor-pointer hover:bg-accent/50 transition-colors border-border/50"
+            <Card
+              onClick={() => handleActionClick(action)}
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
-              onClick={() => handleActionClick(action)}
+              className={cn(
+                "cursor-pointer border border-border/40 p-3 rounded-xl transition-all",
+                "bg-background/40 backdrop-blur-md hover:bg-background/60",
+                "hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] active:scale-[0.97]"
+              )}
             >
-              <div className="text-center">
-                <div className="w-8 h-8 mx-auto mb-2 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex flex-col items-center text-center">
+                <motion.div
+                  className="w-8 h-8 mb-2 flex items-center justify-center rounded-md bg-primary/10 text-primary"
+                  whileHover={{ scale: 1.1 }}
+                >
                   {action.icon}
-                </div>
+                </motion.div>
                 <p className="text-xs font-medium">{action.title}</p>
               </div>
             </Card>
@@ -128,45 +130,51 @@ export function QuickActions() {
         ))}
       </div>
 
-      {/* Desktop: 6 actions */}
+      {/* Desktop */}
       <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {desktopActions.map((action, index) => (
+        {quickActions.map((action, i) => (
           <motion.div
             key={action.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1.7 + index * 0.1 }}
+            transition={{ duration: 0.4, delay: 1.5 + i * 0.1 }}
           >
-            <Card 
-              className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border-border/50 group"
+            <Card
+              onClick={() => handleActionClick(action)}
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
-              onClick={() => handleActionClick(action)}
+              className={cn(
+                "group cursor-pointer p-4 rounded-xl border border-border/40",
+                "bg-background/40 backdrop-blur-lg transition-all duration-300",
+                "hover:bg-background/60 hover:shadow-[0_0_20px_rgba(255,255,255,0.07)] hover:-translate-y-1"
+              )}
             >
               <div className="text-center">
-                <motion.div 
-                  className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
+                <motion.div
+                  className="w-10 h-10 mx-auto mb-3 flex items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform"
+                  whileHover={{ scale: 1.12 }}
+                  transition={{ duration: 0.25 }}
                 >
                   {action.icon}
                 </motion.div>
                 <p className="text-sm font-medium mb-1">{action.title}</p>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  {action.description}
+                </p>
               </div>
             </Card>
           </motion.div>
         ))}
       </div>
 
-      {/* Sparkle decoration */}
+      {/* декоративная вспышка */}
       <motion.div
         className="flex justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 2.2 }}
       >
-        <Sparkles className="w-4 h-4 text-primary/50" />
+        <Sparkles className="w-4 h-4 text-primary/40" />
       </motion.div>
     </div>
   )

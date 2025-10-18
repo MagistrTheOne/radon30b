@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
+import { motion } from 'framer-motion'
 
 const adminNavigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -70,14 +71,22 @@ export default function AdminLayout({
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2">
             {adminNavigation.map((item) => (
-              <Link
+              <motion.div
                 key={item.name}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                <item.icon className="w-4 h-4" />
-                {item.name}
-              </Link>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 ${
+                    window.location.pathname === item.href ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.name}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
@@ -124,15 +133,21 @@ export default function AdminLayout({
           
           <nav className="p-4 space-y-2">
             {adminNavigation.map((item) => (
-              <Link
+              <motion.div
                 key={item.name}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200"
-                onClick={() => setSidebarOpen(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                <item.icon className="w-4 h-4" />
-                {item.name}
-              </Link>
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.name}
+                </Link>
+              </motion.div>
             ))}
           </nav>
         </div>

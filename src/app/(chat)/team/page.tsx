@@ -15,7 +15,7 @@ import {
   User, 
   Trash2,
   Loader2,
-  Building2
+  Building2 
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { teamApi, TeamResponse, TeamMemberResponse, WorkspaceResponse } from '@/lib/team-api'
@@ -30,7 +30,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [inviting, setInviting] = useState(false)
-  
+
   // Forms
   const [newTeamName, setNewTeamName] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
@@ -209,7 +209,7 @@ export default function TeamPage() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator /> {/* Divider */}
 
               {/* Teams List */}
               <div className="space-y-2">
@@ -275,10 +275,7 @@ export default function TeamPage() {
                       <option value="member">Участник</option>
                       <option value="admin">Администратор</option>
                     </select>
-                    <Button 
-                      onClick={handleInviteMember}
-                      disabled={inviting}
-                    >
+                    <Button onClick={handleInviteMember} disabled={inviting}>
                       {inviting ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
@@ -352,7 +349,7 @@ export default function TeamPage() {
                     </Button>
                   </div>
 
-                  <Separator />
+                  <Separator /> {/* Divider */}
 
                   {/* Workspaces List */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

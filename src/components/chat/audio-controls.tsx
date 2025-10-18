@@ -14,12 +14,12 @@ interface AudioControlsProps {
   showSeek?: boolean
 }
 
-export function AudioControls({ 
-  audioUrl, 
+export function AudioControls({
+  audioUrl,
   className,
-  showWaveform = true, // eslint-disable-line @typescript-eslint/no-unused-vars
+  showWaveform = true, // eslint-disable-line
   showVolume = true,
-  showSeek = true
+  showSeek = true,
 }: AudioControlsProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -27,9 +27,10 @@ export function AudioControls({
   const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const audioRef = useRef<HTMLAudioElement>(null)
 
+  // sync audio
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -66,7 +67,7 @@ export function AudioControls({
       audio.pause()
       setIsPlaying(false)
     } else {
-      audio.play()
+      audio.play().catch(() => setIsPlaying(false))
       setIsPlaying(true)
     }
   }
@@ -74,7 +75,6 @@ export function AudioControls({
   const handleSeek = (value: number[]) => {
     const audio = audioRef.current
     if (!audio) return
-
     audio.currentTime = value[0]
     setCurrentTime(value[0])
   }
@@ -82,7 +82,6 @@ export function AudioControls({
   const handleVolumeChange = (value: number[]) => {
     const audio = audioRef.current
     if (!audio) return
-
     const newVolume = value[0]
     setVolume(newVolume)
     audio.volume = newVolume
@@ -92,28 +91,15 @@ export function AudioControls({
   const toggleMute = () => {
     const audio = audioRef.current
     if (!audio) return
-
-    if (isMuted) {
-      audio.volume = volume
-      setIsMuted(false)
-    } else {
-      audio.volume = 0
-      setIsMuted(true)
-    }
+    const muteState = !isMuted
+    setIsMuted(muteState)
+    audio.volume = muteState ? 0 : volume
   }
 
-  const skipBackward = () => {
+  const skip = (delta: number) => {
     const audio = audioRef.current
     if (!audio) return
-
-    audio.currentTime = Math.max(0, audio.currentTime - 10)
-  }
-
-  const skipForward = () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    audio.currentTime = Math.min(duration, audio.currentTime + 10)
+    audio.currentTime = Math.min(duration, Math.max(0, audio.currentTime + delta))
   }
 
   const formatTime = (seconds: number) => {
@@ -123,39 +109,47 @@ export function AudioControls({
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
-      {/* Основные контролы */}
+    <div
+      className={cn(
+        'space-y-3 rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm p-3 transition-all duration-300',
+        className
+      )}
+    >
+      {/* Контролы */}
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
-          onClick={skipBackward}
-          className="h-8 w-8"
+          onClick={() => skip(-10)}
+          className="h-8 w-8 hover:scale-105 transition-transform"
         >
           <SkipBack className="w-4 h-4" />
         </Button>
 
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={togglePlay}
           disabled={isLoading}
-          className="h-10 w-10"
+          className={cn(
+            'h-10 w-10 rounded-full bg-primary/10 backdrop-blur-sm',
+            isPlaying && 'bg-primary/20'
+          )}
         >
           {isLoading ? (
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           ) : isPlaying ? (
             <Pause className="w-4 h-4" />
           ) : (
-            <Play className="w-4 h-4" />
+            <Play className="w-4 h-4 ml-[1px]" />
           )}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          onClick={skipForward}
-          className="h-8 w-8"
+          onClick={() => skip(10)}
+          className="h-8 w-8 hover:scale-105 transition-transform"
         >
           <SkipForward className="w-4 h-4" />
         </Button>
@@ -166,26 +160,22 @@ export function AudioControls({
               variant="ghost"
               size="icon"
               onClick={toggleMute}
-              className="h-8 w-8"
+              className="h-8 w-8 hover:scale-105 transition-transform"
             >
-              {isMuted ? (
-                <VolumeX className="w-4 h-4" />
-              ) : (
-                <Volume2 className="w-4 h-4" />
-              )}
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </Button>
             <Slider
               value={[isMuted ? 0 : volume]}
               onValueChange={handleVolumeChange}
               max={1}
-              step={0.1}
-              className="w-20"
+              step={0.05}
+              className="w-24"
             />
           </div>
         )}
       </div>
 
-      {/* Прогресс бар */}
+      {/* Прогресс */}
       {showSeek && (
         <div className="space-y-1">
           <Slider
@@ -195,20 +185,14 @@ export function AudioControls({
             step={1}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground font-mono">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
       )}
 
-      {/* Скрытый аудио элемент */}
-      <audio
-        ref={audioRef}
-        src={audioUrl}
-        preload="metadata"
-        className="hidden"
-      />
+      <audio ref={audioRef} src={audioUrl} preload="metadata" className="hidden" />
     </div>
   )
 }

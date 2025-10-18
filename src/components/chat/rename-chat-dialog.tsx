@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -19,13 +19,15 @@ interface RenameChatDialogProps {
   onOpenChange: (open: boolean) => void
   chat: ChatResponse | null
   onConfirm: (newTitle: string) => void
+  onDelete: () => void // Added delete handler
 }
 
 export function RenameChatDialog({ 
   open, 
   onOpenChange, 
   chat, 
-  onConfirm 
+  onConfirm,
+  onDelete // Added delete handler as a prop
 }: RenameChatDialogProps) {
   const [newTitle, setNewTitle] = useState('')
 
@@ -39,6 +41,12 @@ export function RenameChatDialog({
     e.preventDefault()
     if (newTitle.trim()) {
       onConfirm(newTitle.trim())
+    }
+  }
+
+  const handleDelete = () => {
+    if (chat && confirm(`Вы уверены, что хотите удалить чат "${chat.title}"?`)) {
+      onDelete() // Call the delete handler
     }
   }
 
@@ -89,6 +97,15 @@ export function RenameChatDialog({
               disabled={!newTitle.trim()}
             >
               Сохранить
+            </Button>
+            {/* Delete Button */}
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={handleDelete} 
+              className="ml-2"
+            >
+              Удалить
             </Button>
           </DialogFooter>
         </form>

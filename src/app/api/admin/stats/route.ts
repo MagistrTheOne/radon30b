@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(_request: NextRequest) {
   try {
     const { userId: clerkUserId } = await auth()
-    
+
     if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
@@ -82,10 +82,13 @@ export async function GET(_request: NextRequest) {
       }
     })
 
-    const subscriptionBreakdown = subscriptionStats.reduce((acc, stat) => {
-      acc[stat.tier] = stat._count.tier
-      return acc
-    }, {} as Record<string, number>)
+    const subscriptionBreakdown = subscriptionStats.reduce(
+      (acc: Record<string, number>, stat: { tier: string; _count: { tier: number } }) => {
+        acc[stat.tier] = stat._count.tier
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     // Рассчитываем рост (примерно)
     const monthlyGrowth = totalUsers > 0 ? (newUsersLast30Days / totalUsers) * 100 : 0

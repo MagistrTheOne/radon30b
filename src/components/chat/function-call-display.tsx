@@ -1,26 +1,25 @@
 "use client"
 
-import { useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Code, 
-  Play, 
-  CheckCircle, 
+import { useState } from "react"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  ChevronDown,
+  ChevronRight,
+  Code,
+  Play,
+  CheckCircle,
   XCircle,
   Clock,
-  Zap
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+  Zap,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export interface FunctionCall {
   name: string
   arguments: Record<string, unknown>
   result?: unknown
-  status?: 'pending' | 'success' | 'error'
+  status?: "pending" | "success" | "error"
   execution_time?: number
 }
 
@@ -29,51 +28,40 @@ interface FunctionCallDisplayProps {
   className?: string
 }
 
-export function FunctionCallDisplay({ 
-  functionCalls, 
-  className 
-}: FunctionCallDisplayProps) {
-  const [expandedCalls, setExpandedCalls] = useState<Set<number>>(new Set())
+export function FunctionCallDisplay({ functionCalls, className }: FunctionCallDisplayProps) {
+  const [expanded, setExpanded] = useState<Set<number>>(new Set())
 
-  const toggleExpanded = (index: number) => {
-    const newExpanded = new Set(expandedCalls)
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index)
-    } else {
-      newExpanded.add(index)
-    }
-    setExpandedCalls(newExpanded)
+  const toggle = (i: number) => {
+    setExpanded((prev) => {
+      const n = new Set(prev)
+      n.has(i) ? n.delete(i) : n.add(i)
+      return n
+    })
   }
 
-  const getStatusIcon = (status?: string) => {
-    switch (status) {
-      case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'error':
-        return <XCircle className="w-4 h-4 text-red-500" />
-      case 'pending':
-        return <Clock className="w-4 h-4 text-yellow-500 animate-pulse" />
-      default:
-        return <Play className="w-4 h-4 text-blue-500" />
-    }
+  const icon = {
+    success: <CheckCircle className="w-4 h-4 text-emerald-500" />,
+    error: <XCircle className="w-4 h-4 text-rose-500" />,
+    pending: <Clock className="w-4 h-4 text-yellow-500 animate-pulse" />,
+    default: <Play className="w-4 h-4 text-blue-500" />,
   }
 
-  const getStatusBadge = (status?: string) => {
-    switch (status) {
-      case 'success':
-        return <Badge variant="default" className="bg-green-500/10 text-green-500 border-green-500/20">Выполнено</Badge>
-      case 'error':
-        return <Badge variant="destructive">Ошибка</Badge>
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Выполняется</Badge>
-      default:
-        return <Badge variant="outline">Готово к выполнению</Badge>
-    }
+  const badge = {
+    success: (
+      <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+        Выполнено
+      </Badge>
+    ),
+    error: <Badge variant="destructive">Ошибка</Badge>,
+    pending: (
+      <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+        Выполняется
+      </Badge>
+    ),
+    default: <Badge variant="outline">Готово</Badge>,
   }
 
-  if (!functionCalls || functionCalls.length === 0) {
-    return null
-  }
+  if (!functionCalls?.length) return null
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -81,84 +69,88 @@ export function FunctionCallDisplay({
         <Zap className="w-4 h-4" />
         <span>Function Calls ({functionCalls.length})</span>
       </div>
-      
-      {functionCalls.map((call, index) => {
-        const isExpanded = expandedCalls.has(index)
-        
+
+      {functionCalls.map((call, i) => {
+        const open = expanded.has(i)
+        const st = call.status ?? "default"
+
         return (
-          <Card key={index} className="p-3">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleExpanded(index)}
+          <Card
+            key={i}
+            className={cn(
+              "p-3 bg-card/60 backdrop-blur-sm border-border/40 transition-all duration-300",
+              open && "ring-1 ring-primary/10"
+            )}
+          >
+            <div
+              className="flex items-center justify-between cursor-pointer select-none"
+              onClick={() => toggle(i)}
             >
               <div className="flex items-center gap-2">
-                {isExpanded ? (
+                {open ? (
                   <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 ) : (
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 )}
                 <Code className="w-4 h-4 text-primary" />
-                <span className="font-mono text-sm font-medium">
-                  {call.name}
-                </span>
-                {getStatusIcon(call.status)}
+                <span className="font-mono text-sm font-medium">{call.name}</span>
+                {icon[st as keyof typeof icon]}
               </div>
-              
+
               <div className="flex items-center gap-2">
-                {getStatusBadge(call.status)}
+                {badge[st as keyof typeof badge]}
                 {call.execution_time && (
-                  <span className="text-xs text-muted-foreground">
-                    {call.execution_time}ms
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {call.execution_time} ms
                   </span>
                 )}
               </div>
             </div>
 
-            {isExpanded && (
-              <div className="mt-3 space-y-3">
-                {/* Аргументы функции */}
-                <div>
+            <div
+              className={cn(
+                "grid transition-all overflow-hidden",
+                open ? "grid-rows-[1fr] mt-3" : "grid-rows-[0fr]"
+              )}
+            >
+              <div className="overflow-hidden space-y-3">
+                <section>
                   <h4 className="text-xs font-medium text-muted-foreground mb-2">
                     Аргументы:
                   </h4>
-                  <div className="bg-muted/50 rounded-md p-2">
-                    <pre className="text-xs font-mono overflow-x-auto">
-                      {JSON.stringify(call.arguments, null, 2)}
-                    </pre>
-                  </div>
-                </div>
+                  <pre className="bg-muted/40 rounded-md p-2 text-xs font-mono whitespace-pre-wrap break-all">
+                    {JSON.stringify(call.arguments, null, 2)}
+                  </pre>
+                </section>
 
-                {/* Результат выполнения */}
                 {call.result !== undefined && (
-                  <div>
+                  <section>
                     <h4 className="text-xs font-medium text-muted-foreground mb-2">
                       Результат:
                     </h4>
-                    <div className={cn(
-                      "rounded-md p-2",
-                      call.status === 'error' 
-                        ? "bg-red-500/10 border border-red-500/20" 
-                        : "bg-green-500/10 border border-green-500/20"
-                    )}>
-                      <pre className="text-xs font-mono overflow-x-auto">
-                        {typeof call.result === 'string' 
-                          ? call.result 
-                          : JSON.stringify(call.result, null, 2)
-                        }
-                      </pre>
-                    </div>
-                  </div>
+                    <pre
+                      className={cn(
+                        "rounded-md p-2 text-xs font-mono whitespace-pre-wrap break-all",
+                        call.status === "error"
+                          ? "bg-rose-500/10 border border-rose-500/20"
+                          : "bg-emerald-500/10 border border-emerald-500/20"
+                      )}
+                    >
+                      {typeof call.result === "string"
+                        ? call.result
+                        : JSON.stringify(call.result, null, 2)}
+                    </pre>
+                  </section>
                 )}
 
-                {/* Информация о функции */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Function: {call.name}</span>
                   {call.execution_time && (
-                    <span>Время выполнения: {call.execution_time}ms</span>
+                    <span>{call.execution_time} ms</span>
                   )}
                 </div>
               </div>
-            )}
+            </div>
           </Card>
         )
       })}

@@ -41,7 +41,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [chats, setChats] = useState<ChatResponse[]>([])
   const [currentChat, setCurrentChat] = useState<ChatResponse | null>(null)
   const [messages, setMessages] = useState<MessageResponse[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // Начинаем с loading: true
   const [error, setError] = useState<string | null>(null)
 
   // Загрузка чатов при инициализации
@@ -60,7 +60,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setLoading(true)
         setError(null)
         const response = await chatApi.getChats()
-        setChats(response.data)
+        setChats(Array.isArray(response.data) ? response.data : [])
         
         if (attempt > 1) {
           toast.success('Чаты загружены после повторной попытки')
@@ -405,6 +405,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 export function useChatContext() {
   const context = useContext(ChatContext)
   if (context === undefined) {
+    console.error('useChatContext must be used within a ChatProvider')
     throw new Error('useChatContext must be used within a ChatProvider')
   }
   return context

@@ -25,6 +25,10 @@ const isPublicRoute = createRouteMatcher([
   '/api/search',
   '/api/contact',
   '/api/upload',
+  '/api/radon/health',
+  '/api/radon/chat',
+  '/api/radon/personalities',
+  '/api/radon/functions',
 ])
 
 export default clerkMiddleware(async (auth, req) => {

@@ -14,7 +14,10 @@ export const chatApi = {
 
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.error || 'Failed to create chat')
+      const errorMessage = error.details
+        ? `${error.error}: ${error.details}`
+        : error.error || 'Failed to create chat'
+      throw new Error(errorMessage)
     }
 
     const data = await response.json()

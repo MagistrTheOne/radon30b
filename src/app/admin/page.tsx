@@ -14,6 +14,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 
 interface AdminStats {
   totalUsers: number
@@ -96,89 +97,33 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Всего пользователей</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalTeams}</p>
-                <p className="text-sm text-muted-foreground">Команд</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Общий доход</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-purple-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.dailyActiveUsers}</p>
-                <p className="text-sm text-muted-foreground">Активных сегодня</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalMessages.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Всего сообщений</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <Crown className="w-5 h-5 text-cyan-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalChats.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Всего чатов</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {[
+          { title: 'Всего пользователей', value: stats.totalUsers, icon: Users, color: 'blue' },
+          { title: 'Команд', value: stats.totalTeams, icon: Building2, color: 'green' },
+          { title: 'Общий доход', value: stats.totalRevenue, icon: DollarSign, color: 'yellow' },
+          { title: 'Активных сегодня', value: stats.dailyActiveUsers, icon: Activity, color: 'purple' }
+        ].map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center`}>
+                    <item.icon className={`w-5 h-5 text-${item.color}-500`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{item.value.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">{item.title}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -196,18 +141,25 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-3">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    {activity.type === 'user_signup' && <Users className="w-4 h-4" />}
-                    {activity.type === 'team_created' && <Building2 className="w-4 h-4" />}
-                    {activity.type === 'subscription_upgrade' && <Crown className="w-4 h-4" />}
-                    {activity.type === 'payment_received' && <DollarSign className="w-4 h-4" />}
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      {activity.type === 'user_signup' && <Users className="w-4 h-4" />}
+                      {activity.type === 'team_created' && <Building2 className="w-4 h-4" />}
+                      {activity.type === 'subscription_upgrade' && <Crown className="w-4 h-4" />}
+                      {activity.type === 'payment_received' && <DollarSign className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{activity.user}</p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.user}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </CardContent>
@@ -227,27 +179,34 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-3">
               {topTeams.map((team, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-bold">#{index + 1}</span>
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold">#{index + 1}</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{team.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {team.members} участников
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{team.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {team.members} участников
+                    <div className="text-right">
+                      <Badge variant={team.plan === 'Enterprise' ? 'default' : 'secondary'}>
+                        {team.plan}
+                      </Badge>
+                      <p className="text-sm font-medium mt-1">
+                        ${team.revenue}/мес
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant={team.plan === 'Enterprise' ? 'default' : 'secondary'}>
-                      {team.plan}
-                    </Badge>
-                    <p className="text-sm font-medium mt-1">
-                      ${team.revenue}/мес
-                    </p>
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </CardContent>

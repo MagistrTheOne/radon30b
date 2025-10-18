@@ -14,7 +14,7 @@ export async function POST(
 ) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -108,7 +108,10 @@ export async function POST(
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        {
+          error: 'User not found',
+          details: 'Пользователь не найден в базе данных. Возможно, нужно выполнить синхронизацию пользователей.'
+        },
         { status: 404 }
       )
     }
@@ -153,29 +156,39 @@ export async function POST(
       .map((msg: { role: string; content: string }) => `${msg.role === 'user' ? 'Пользователь' : 'Radon AI'}: ${msg.content}`)
       .join('\n')
 
-    // Вызвать Radon AI API v2.0.0 с новыми параметрами
-    const radonResponse = await callRadonAPIWithRetry(content, {
-      max_new_tokens: 512,
-      temperature: 0.7,
-      imageUrl: imageUrl,
-      audioUrl: audioUrl,
-      // Новые параметры API v2.0.0
-      enable_functions: true, // Включаем function calling
-      personality: 'helpful', // Режим общения
-      conversation_id: chatId, // Используем chatId как conversation_id
-      user_id: userId // ID пользователя из Clerk
+    // Вызвать Radon AI API через наш API route
+    const radonResponse = await fetch('/api/radon/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: content,
+        max_new_tokens: 512,
+        temperature: 0.7,
+        personality: 'helpful',
+        enable_functions: true,
+        conversation_id: chatId,
+        user_id: userId
+      })
     })
+
+    if (!radonResponse.ok) {
+      throw new Error(`Radon API error: ${radonResponse.status}`)
+    }
+
+    const radonData = await radonResponse.json()
 
     // Создать сообщение от AI с новыми полями API v2.0.0
     const aiMessage = await prisma.message.create({
       data: {
         chatId: chatId,
         role: 'assistant',
-        content: radonResponse.response,
+        content: radonData.response,
         // Новые поля API v2.0.0
-        functionCalls: radonResponse.function_calls ? JSON.stringify(radonResponse.function_calls) : undefined,
-        personalityUsed: radonResponse.personality_used || null,
-        conversationId: radonResponse.conversation_id || null
+        functionCalls: radonData.function_calls ? JSON.stringify(radonData.function_calls) : undefined,
+        personalityUsed: radonData.personality_used || null,
+        conversationId: radonData.conversation_id || null
       }
     })
 

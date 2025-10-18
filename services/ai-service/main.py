@@ -39,7 +39,10 @@ app.add_middleware(
 
 # Qwen3-Omni configuration
 QWEN_MODEL_PATH = os.getenv("QWEN_MODEL_PATH", "Qwen/Qwen3-Omni-30B-A3B-Instruct")
-RADON_API_URL = os.getenv("RADON_API_URL", "http://213.219.215.235:8000")
+RADON_API_URL = os.getenv("RADON_API_URL")
+
+if not RADON_API_URL:
+    raise ValueError("RADON_API_URL environment variable is required")
 RADON_API_KEY = os.getenv("RADON_API_KEY")
 
 # Initialize Qwen3-Omni model (lazy loading)

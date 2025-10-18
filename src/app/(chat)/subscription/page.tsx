@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Crown, 
-  Zap, 
-  Building2, 
-  Check, 
-  X, 
+import {
+  Crown,
+  Zap,
+  Building2,
+  Check,
+  X,
   CreditCard,
   BarChart3,
   ArrowRight,
@@ -34,14 +34,14 @@ export default function SubscriptionPage() {
 
   const loadSubscriptionData = async () => {
     if (!user?.id) return
-    
+
     try {
       setLoading(true)
       const [subscriptionResponse, usageResponse] = await Promise.all([
         subscriptionApi.getCurrentSubscription(),
         subscriptionApi.getUsageStats('30d')
       ])
-      
+
       setSubscription(subscriptionResponse.data)
       setUsageStats(usageResponse.data)
     } catch (error) {
@@ -144,7 +144,6 @@ export default function SubscriptionPage() {
       popular: false
     }
   ]
-
 
   const getUsagePercentage = () => {
     if (!usageStats) return 0
@@ -305,6 +304,7 @@ export default function SubscriptionPage() {
                 </div>
               )}
               
+
               <CardHeader className="text-center pb-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <plan.icon className="w-6 h-6 text-primary" />

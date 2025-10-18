@@ -6,7 +6,7 @@ import { callRadonAPIWithRetry } from '@/lib/radon-client'
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Не авторизован' },

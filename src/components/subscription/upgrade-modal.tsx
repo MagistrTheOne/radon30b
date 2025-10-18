@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -45,16 +46,16 @@ export function UpgradeModal({
       case 'pro':
         return {
           name: 'Pro',
-          price: '$19',
-          period: 'месяц',
+          price: '$39',
+          period: 'мес',
           icon: Crown,
           color: 'text-blue-500'
         }
       case 'team':
         return {
           name: 'Team',
-          price: '$99',
-          period: 'месяц',
+          price: '$149',
+          period: 'мес',
           icon: Building2,
           color: 'text-purple-500'
         }
@@ -89,30 +90,32 @@ export function UpgradeModal({
     switch (trigger) {
       case 'rate_limit_reached':
         return 'Вы достигли лимита запросов для вашего текущего плана'
-      case 'manual':
-        return 'Обновите план для получения дополнительных возможностей'
       default:
-        return 'Обновите план для получения дополнительных возможностей'
+        return 'Получите больше возможностей с новым уровнем Radon AI'
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Crown className="w-6 h-6 text-yellow-500" />
-            Обновление плана
-          </DialogTitle>
-          <DialogDescription>
-            {getTriggerMessage()}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="p-6 space-y-6 bg-background/95 backdrop-blur-md"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Crown className="w-5 h-5 text-yellow-500" />
+              Обновление плана
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
+              {getTriggerMessage()}
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Current vs Recommended */}
+          {/* Plans comparison */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Current Plan */}
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <currentTierInfo.icon className={`w-5 h-5 ${currentTierInfo.color}`} />
@@ -122,8 +125,10 @@ export function UpgradeModal({
               <p className="text-sm text-muted-foreground">/{currentTierInfo.period}</p>
             </div>
 
-            {/* Recommended Plan */}
-            <div className="p-4 border border-primary rounded-lg bg-primary/5">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              className="p-4 border border-primary rounded-lg bg-primary/5 shadow-sm relative"
+            >
               <div className="flex items-center gap-2 mb-2">
                 <recommendedTierInfo.icon className={`w-5 h-5 ${recommendedTierInfo.color}`} />
                 <span className="font-medium">{recommendedTierInfo.name}</span>
@@ -131,36 +136,36 @@ export function UpgradeModal({
               </div>
               <p className="text-2xl font-bold">{recommendedTierInfo.price}</p>
               <p className="text-sm text-muted-foreground">/{recommendedTierInfo.period}</p>
-            </div>
+            </motion.div>
           </div>
 
           {/* Features */}
           <div>
-            <h4 className="font-medium mb-3">Что вы получите:</h4>
+            <h4 className="font-medium mb-3">Что добавится:</h4>
             <div className="space-y-2">
               {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div key={index} className="flex items-center gap-2 text-sm">
                   <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm">{feature}</span>
+                  <span>{feature}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Benefits */}
+          {/* Benefits block */}
           <div className="p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium mb-2">Преимущества обновления:</h4>
+            <h4 className="font-medium mb-2">Преимущества апгрейда:</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Безлимитные запросы</li>
-              <li>• Приоритетная обработка</li>
+              <li>• Быстрее ответы</li>
               <li>• Расширенная история чатов</li>
               <li>• Приоритетная поддержка</li>
-              <li>• API доступ</li>
+              <li>• API доступ с увеличенным лимитом</li>
             </ul>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button 
               variant="outline" 
               onClick={() => onOpenChange(false)}
@@ -186,7 +191,11 @@ export function UpgradeModal({
               )}
             </Button>
           </div>
-        </div>
+
+          <p className="text-[11px] text-center text-muted-foreground">
+            Без скрытых платежей • Можно отменить в любой момент
+          </p>
+        </motion.div>
       </DialogContent>
     </Dialog>
   )

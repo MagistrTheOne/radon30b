@@ -1,109 +1,102 @@
 "use client"
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useReducer, useState } from 'react'
+import { useUser } from '@clerk/nextjs'
+import { toast } from 'sonner'
+import { motion } from 'framer-motion'
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Edit3, 
-  Save, 
-  Camera,
-  Globe,
-  Key,
-  Trash2,
-  AlertTriangle
+import {
+  User, Mail, Calendar, Shield, Edit3, Save, Camera,
+  Globe, Key, Trash2, AlertTriangle, Loader2
 } from 'lucide-react'
-import { useUser } from '@clerk/nextjs'
-import { toast } from 'sonner'
+
+interface ProfileData {
+  firstName: string
+  lastName: string
+  email: string
+  bio: string
+  location: string
+  website: string
+  timezone: string
+  avatar: string
+}
 
 export default function ProfilePage() {
   const { user } = useUser()
   const [isEditing, setIsEditing] = useState(false)
-  const [profileData, setProfileData] = useState({
+  const [loading, setLoading] = useState<'save' | 'delete' | null>(null)
+
+  const initialData: ProfileData = {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.emailAddresses[0]?.emailAddress || '',
     bio: 'Пользователь Radon AI',
     location: 'Краснодар, Россия',
     website: '',
-    timezone: 'Europe/Moscow',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     avatar: user?.imageUrl || ''
-  })
+  }
+
+  const [profileData, updateProfile] = useReducer(
+    (state: ProfileData, update: Partial<ProfileData>) => ({ ...state, ...update }),
+    initialData
+  )
 
   const handleSave = async () => {
+    setLoading('save')
     try {
-      const response = await fetch('/api/profile', {
+      const res = await fetch('/api/profile', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: profileData.firstName + (profileData.lastName ? ` ${profileData.lastName}` : ''),
+          name: `${profileData.firstName} ${profileData.lastName}`.trim(),
           imageUrl: profileData.avatar
         })
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Ошибка сохранения профиля')
-      }
-
-      toast.success('Профиль обновлен')
+      if (!res.ok) throw new Error((await res.json()).error || 'Ошибка сохранения')
+      toast.success('Профиль обновлён')
       setIsEditing(false)
-    } catch (error) {
-      console.error('Error saving profile:', error)
-      toast.error(error instanceof Error ? error.message : 'Ошибка сохранения профиля')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Ошибка сохранения профиля')
+    } finally {
+      setLoading(null)
     }
   }
 
   const handleCancel = () => {
-    // Reset to original data
-    setProfileData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.emailAddresses[0]?.emailAddress || '',
-      bio: 'Пользователь Radon AI',
-      location: 'Краснодар, Россия',
-      website: '',
-      timezone: 'Europe/Moscow',
-      avatar: user?.imageUrl || ''
-    })
+    updateProfile(initialData)
     setIsEditing(false)
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
-      return
-    }
-
+    if (!confirm('Удалить аккаунт безвозвратно?')) return
+    setLoading('delete')
     try {
-      const response = await fetch('/api/profile', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Ошибка удаления аккаунта')
-      }
-
-      toast.success('Аккаунт удален')
-      // Перенаправляем на главную страницу
+      const res = await fetch('/api/profile', { method: 'DELETE' })
+      if (!res.ok) throw new Error((await res.json()).error || 'Ошибка удаления')
+      toast.success('Аккаунт удалён')
       window.location.href = '/'
-    } catch (error) {
-      console.error('Error deleting account:', error)
-      toast.error(error instanceof Error ? error.message : 'Ошибка удаления аккаунта')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Ошибка удаления аккаунта')
+    } finally {
+      setLoading(null)
     }
+  }
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    updateProfile({ avatar: url })
+    toast('Фото обновлено (локально, не загружено)')
   }
 
   return (
@@ -111,22 +104,24 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <User className="w-8 h-8" />
+          <h1 className="text-3xl font-semibold flex items-center gap-3">
+            <User className="w-7 h-7 text-primary" />
             Профиль
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-1">
             Управляйте информацией о вашем профиле
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button variant="outline" onClick={handleCancel}>
+              <Button variant="ghost" onClick={handleCancel} disabled={loading !== null}>
                 Отмена
               </Button>
-              <Button onClick={handleSave}>
-                <Save className="w-4 h-4 mr-2" />
+              <Button onClick={handleSave} disabled={loading !== null}>
+                {loading === 'save'
+                  ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  : <Save className="w-4 h-4 mr-2" />}
                 Сохранить
               </Button>
             </>
@@ -141,82 +136,69 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Info */}
-        <div className="lg:col-span-2 space-y-6">
+        <motion.div
+          layout
+          className="lg:col-span-2 space-y-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           {/* Basic Info */}
           <Card>
             <CardHeader>
               <CardTitle>Основная информация</CardTitle>
-              <CardDescription>
-                Ваша основная информация и контактные данные
-              </CardDescription>
+              <CardDescription>Контактные и личные данные</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Имя</Label>
-                  <Input
-                    id="firstName"
-                    value={profileData.firstName}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Фамилия</Label>
-                  <Input
-                    id="lastName"
-                    value={profileData.lastName}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profileData.email}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email нельзя изменить. Обратитесь в поддержку при необходимости.
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="bio">О себе</Label>
-                <Input
-                  id="bio"
-                  value={profileData.bio}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                <Field
+                  label="Имя"
+                  id="firstName"
+                  value={profileData.firstName}
                   disabled={!isEditing}
-                  placeholder="Расскажите о себе..."
+                  onChange={(v) => updateProfile({ firstName: v })}
+                />
+                <Field
+                  label="Фамилия"
+                  id="lastName"
+                  value={profileData.lastName}
+                  disabled={!isEditing}
+                  onChange={(v) => updateProfile({ lastName: v })}
                 />
               </div>
-              
+
+              <Field
+                label="Email"
+                id="email"
+                value={profileData.email}
+                disabled
+                hint="Email нельзя изменить. Обратитесь в поддержку."
+              />
+
+              <Field
+                label="О себе"
+                id="bio"
+                value={profileData.bio}
+                disabled={!isEditing}
+                onChange={(v) => updateProfile({ bio: v })}
+                placeholder="Расскажите о себе..."
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Местоположение</Label>
-                  <Input
-                    id="location"
-                    value={profileData.location}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website">Веб-сайт</Label>
-                  <Input
-                    id="website"
-                    value={profileData.website}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="https://example.com"
-                  />
-                </div>
+                <Field
+                  label="Местоположение"
+                  id="location"
+                  value={profileData.location}
+                  disabled={!isEditing}
+                  onChange={(v) => updateProfile({ location: v })}
+                />
+                <Field
+                  label="Веб-сайт"
+                  id="website"
+                  value={profileData.website}
+                  disabled={!isEditing}
+                  onChange={(v) => updateProfile({ website: v })}
+                  placeholder="https://example.com"
+                />
               </div>
             </CardContent>
           </Card>
@@ -225,166 +207,165 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
+                <Shield className="w-5 h-5 text-primary" />
                 Настройки аккаунта
               </CardTitle>
-              <CardDescription>
-                Управление безопасностью и настройками аккаунта
-              </CardDescription>
+              <CardDescription>Безопасность и управление</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Key className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Пароль</p>
-                    <p className="text-sm text-muted-foreground">
-                      Последнее изменение: 2 недели назад
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Изменить
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Двухфакторная аутентификация</p>
-                    <p className="text-sm text-muted-foreground">
-                      Дополнительная защита аккаунта
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="secondary">Не включена</Badge>
-              </div>
+              <SettingsRow
+                icon={<Key className="w-5 h-5 text-muted-foreground" />}
+                title="Пароль"
+                subtitle="Последнее изменение: 2 недели назад"
+                action={<Button variant="outline" size="sm">Изменить</Button>}
+              />
+              <SettingsRow
+                icon={<Shield className="w-5 h-5 text-muted-foreground" />}
+                title="Двухфакторная аутентификация"
+                subtitle="Дополнительная защита"
+                action={<Badge variant="secondary">Не включена</Badge>}
+              />
             </CardContent>
           </Card>
 
           {/* Danger Zone */}
-          <Card className="border-red-200 dark:border-red-800">
+          <Card className="border-destructive/40">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-600">
+              <CardTitle className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="w-5 h-5" />
                 Опасная зона
               </CardTitle>
-              <CardDescription>
-                Необратимые действия с вашим аккаунтом
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-destructive/40 rounded-lg">
                 <div>
-                  <p className="font-medium text-red-600">Удалить аккаунт</p>
+                  <p className="font-medium text-destructive">Удалить аккаунт</p>
                   <p className="text-sm text-muted-foreground">
                     Навсегда удалить ваш аккаунт и все данные
                   </p>
                 </div>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   size="sm"
                   onClick={handleDeleteAccount}
+                  disabled={loading !== null}
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  {loading === 'delete'
+                    ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    : <Trash2 className="w-4 h-4 mr-2" />}
                   Удалить
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Avatar */}
+        <motion.div
+          layout
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
           <Card>
-            <CardHeader>
-              <CardTitle>Аватар</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Аватар</CardTitle></CardHeader>
             <CardContent className="text-center">
-              <Avatar className="w-24 h-24 mx-auto mb-4">
-                <AvatarImage src={user?.imageUrl} />
+              <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-primary/10">
+                <AvatarImage src={profileData.avatar} />
                 <AvatarFallback className="text-lg">
-                  {user?.firstName?.charAt(0) || user?.emailAddresses[0]?.emailAddress?.charAt(0) || 'U'}
+                  {user?.firstName?.[0] || user?.emailAddresses[0]?.emailAddress?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <Button variant="outline" size="sm" className="w-full">
+              <input
+                type="file"
+                accept="image/*"
+                id="avatar-upload"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => document.getElementById('avatar-upload')?.click()}
+              >
                 <Camera className="w-4 h-4 mr-2" />
                 Изменить фото
               </Button>
             </CardContent>
           </Card>
 
-          {/* Account Info */}
           <Card>
-            <CardHeader>
-              <CardTitle>Информация об аккаунте</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Дата регистрации</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date().toLocaleDateString('ru-RU')}
-                  </p>
-                </div>
-              </div>
-              
+            <CardHeader><CardTitle>Аккаунт</CardTitle></CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <InfoRow icon={<Calendar />} title="Дата регистрации" value={new Date().toLocaleDateString('ru-RU')} />
               <Separator />
-              
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Email подтвержден</p>
-                  <p className="text-xs text-muted-foreground">
-                    {user?.emailAddresses[0]?.verification?.status === 'verified' ? 'Да' : 'Нет'}
-                  </p>
-                </div>
-              </div>
-              
+              <InfoRow icon={<Mail />} title="Email подтвержден" value={user?.emailAddresses[0]?.verification?.status === 'verified' ? 'Да' : 'Нет'} />
               <Separator />
-              
-              <div className="flex items-center gap-3">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Часовой пояс</p>
-                  <p className="text-xs text-muted-foreground">
-                    {profileData.timezone}
-                  </p>
-                </div>
-              </div>
+              <InfoRow icon={<Globe />} title="Часовой пояс" value={profileData.timezone} />
             </CardContent>
           </Card>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
 
-          {/* Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Статистика</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold">47</div>
-                <div className="text-sm text-muted-foreground">Запросов в месяц</div>
-              </div>
-              
-              <Separator />
-              
-              <div className="text-center">
-                <div className="text-2xl font-bold">12</div>
-                <div className="text-sm text-muted-foreground">Чатов создано</div>
-              </div>
-              
-              <Separator />
-              
-              <div className="text-center">
-                <div className="text-2xl font-bold">2.3k</div>
-                <div className="text-sm text-muted-foreground">Слов сгенерировано</div>
-              </div>
-            </CardContent>
-          </Card>
+function Field({ label, id, value, disabled, onChange, placeholder, hint }: {
+  label: string; id: string; value: string; disabled?: boolean;
+  onChange?: (v: string) => void; placeholder?: string; hint?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={(e) => onChange?.(e.target.value)}
+        className={disabled ? 'bg-muted/60' : ''}
+      />
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  )
+}
+
+interface SettingsRowProps {
+  icon: React.ReactNode
+  title: string
+  subtitle: string
+  action: React.ReactNode
+}
+
+function SettingsRow({ icon, title, subtitle, action }: SettingsRowProps) {
+  return (
+    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20 hover:bg-muted/30 transition">
+      <div className="flex items-center gap-3">
+        {icon}
+        <div>
+          <p className="font-medium">{title}</p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
+      </div>
+      {action}
+    </div>
+  )
+}
+
+interface InfoRowProps {
+  icon: React.ReactNode
+  title: string
+  value: string | number
+}
+
+function InfoRow({ icon, title, value }: InfoRowProps) {
+  return (
+    <div className="flex items-center gap-3">
+      {icon}
+      <div>
+        <p className="font-medium">{title}</p>
+        <p className="text-muted-foreground">{value}</p>
       </div>
     </div>
   )

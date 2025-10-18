@@ -12,11 +12,11 @@ export async function POST(
 ) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return new Response(
         'data: {"error": "Unauthorized"}\n\n',
-        { 
+        {
           status: 401,
           headers: {
             'Content-Type': 'text/event-stream',
@@ -52,7 +52,7 @@ export async function POST(
 
     if (!user) {
       return new Response(
-        'data: {"error": "User not found"}\n\n',
+        'data: {"error": "User not found", "details": "Пользователь не найден в базе данных. Возможно, нужно выполнить синхронизацию пользователей."}\n\n',
         { 
           status: 404,
           headers: {

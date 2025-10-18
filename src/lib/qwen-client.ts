@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios'
 
 // Qwen3-Omni API client - используем API Gateway
 const qwenApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_GATEWAY_URL || '/api/qwen',
   timeout: 300000, // 5 minutes for AI processing
   headers: {
     'Content-Type': 'application/json',

@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(_request: NextRequest) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -22,10 +22,34 @@ export async function GET(_request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      // Автоматически создаем пользователя при первом запросе
+      console.log(`👤 Создаем пользователя для Clerk ID: ${userId}`)
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            clerkId: userId,
+            email: `${userId}@example.com`,
+            role: 'user',
+            subscriptionData: {
+              create: {
+                tier: 'free',
+                requestsUsed: 0,
+                requestsLimit: 10
+              }
+            }
+          }
+        })
+        console.log(`✅ Пользователь создан: ${newUser.id}`)
+      } catch (createError) {
+        console.error('❌ Ошибка создания пользователя:', createError)
+        return NextResponse.json(
+          {
+            error: 'Failed to create user',
+            details: 'Не удалось автоматически создать пользователя. Попробуйте создать его вручную.'
+          },
+          { status: 500 }
+        )
+      }
     }
 
     // Получить чаты пользователя с подсчетом сообщений
@@ -64,7 +88,7 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -88,10 +112,34 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      // Автоматически создаем пользователя при первом запросе
+      console.log(`👤 Создаем пользователя для Clerk ID: ${userId}`)
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            clerkId: userId,
+            email: `${userId}@example.com`,
+            role: 'user',
+            subscriptionData: {
+              create: {
+                tier: 'free',
+                requestsUsed: 0,
+                requestsLimit: 10
+              }
+            }
+          }
+        })
+        console.log(`✅ Пользователь создан: ${newUser.id}`)
+      } catch (createError) {
+        console.error('❌ Ошибка создания пользователя:', createError)
+        return NextResponse.json(
+          {
+            error: 'Failed to create user',
+            details: 'Не удалось автоматически создать пользователя. Попробуйте создать его вручную.'
+          },
+          { status: 500 }
+        )
+      }
     }
 
     // Создать новый чат

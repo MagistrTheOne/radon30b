@@ -34,11 +34,15 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
         const response = await fetch('/api/usage/stats')
         if (response.ok) {
           const data = await response.json()
-          setUsageStats({
-            used: data.used,
-            limit: data.limit,
-            period: data.period
-          })
+          if (data && typeof data.used === 'number' && typeof data.limit === 'number') {
+            setUsageStats({
+              used: data.used,
+              limit: data.limit,
+              period: data.period || 'сегодня'
+            })
+          } else {
+            throw new Error('Invalid usage stats data')
+          }
         } else {
           // Fallback to mock data if API fails
           const mockStats: UsageStats = {
@@ -69,21 +73,21 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
     switch (subscription) {
       case 'pro':
         return (
-          <Badge className="bg-primary text-primary-foreground">
+          <Badge className="bg-primary text-primary-foreground text-xs py-1 px-2">
             <Crown className="w-3 h-3 mr-1" />
             Pro
           </Badge>
         )
       case 'enterprise':
         return (
-          <Badge className="bg-purple-500 text-white">
+          <Badge className="bg-purple-500 text-white text-xs py-1 px-2">
             <Crown className="w-3 h-3 mr-1" />
             Enterprise
           </Badge>
         )
       default:
         return (
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="text-xs py-1 px-2">
             <Zap className="w-3 h-3 mr-1" />
             Free
           </Badge>

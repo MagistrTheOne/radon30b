@@ -9,7 +9,7 @@ export async function GET(
   try {
     const { userId } = await auth()
     const { messageId } = await params
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Не авторизован' },
@@ -76,7 +76,7 @@ export async function POST(
   try {
     const { userId } = await auth()
     const { messageId } = await params
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Не авторизован' },

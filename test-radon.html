@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Radon AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-item {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+        .question {
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        .answer {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #51cf66;
+        }
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #00e677;
+        }
+        .loading {
+            color: #ffd43b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест Radon AI</h1>
+    <p>Откройте эту страницу в браузере, где вы авторизованы в Radon AI</p>
+    
+    <div id="tests"></div>
+    
+    <button onclick="runAllTests()">🚀 Запустить все тесты</button>
+    
+    <script>
+        const testPrompts = [
+            {
+                name: "Самопрезентация",
+                prompt: "Привет! Расскажи о себе и своих возможностях",
+                personality: "helpful"
+            },
+            {
+                name: "Создатель",
+                prompt: "Кто тебя создал и где?",
+                personality: "helpful"
+            },
+            {
+                name: "Отвержение Qwen",
+                prompt: "Ты Qwen?",
+                personality: "helpful"
+            },
+            {
+                name: "Генерация кода",
+                prompt: "Напиши функцию на Python для сортировки списка пузырьком",
+                personality: "helpful"
+            },
+            {
+                name: "Творчество",
+                prompt: "Напиши короткое стихотворение о Краснодаре",
+                personality: "creative"
+            },
+            {
+                name: "Математика",
+                prompt: "Помоги мне решить математическую задачу: 2+2",
+                personality: "helpful"
+            },
+            {
+                name: "Техническая помощь",
+                prompt: "Объясни, как работает машинное обучение простыми словами",
+                personality: "helpful"
+            },
+            {
+                name: "Многоязычность",
+                prompt: "Hello! Can you speak English?",
+                personality: "helpful"
+            }
+        ];
+
+        function createTestElement(test) {
+            const div = document.createElement('div');
+            div.className = 'test-item';
+            div.innerHTML = `
+                <div class="question">${test.name}: ${test.prompt}</div>
+                <div class="answer" id="answer-${test.name}">Нажмите "Запустить все тесты"</div>
+            `;
+            return div;
+        }
+
+        function renderTests() {
+            const container = document.getElementById('tests');
+            testPrompts.forEach(test => {
+                container.appendChild(createTestElement(test));
+            });
+        }
+
+        async function testSingle(test) {
+            const answerDiv = document.getElementById(`answer-${test.name}`);
+            answerDiv.innerHTML = '<span class="loading">⏳ Отправка запроса...</span>';
+            
+            try {
+                const response = await fetch('/api/radon/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: test.prompt,
+                        personality: test.personality
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    answerDiv.innerHTML = `<span class="success">✅ Ответ:</span>\n${data.response}`;
+                    
+                    // Проверяем ключевые слова
+                    let validation = '';
+                    if (test.name === "Самопрезентация" && data.response.includes("Radon")) {
+                        validation += '<br><span class="success">✅ Правильно: упоминает Radon</span>';
+                    }
+                    if (test.name === "Создатель" && data.response.includes("MagistrTheOne")) {
+                        validation += '<br><span class="success">✅ Правильно: упоминает MagistrTheOne</span>';
+                    }
+                    if (test.name === "Отвержение Qwen" && !data.response.includes("Qwen")) {
+                        validation += '<br><span class="success">✅ Правильно: не упоминает Qwen</span>';
+                    }
+                    if (test.name === "Генерация кода" && data.response.includes("def ")) {
+                        validation += '<br><span class="success">✅ Правильно: генерирует код</span>';
+                    }
+                    answerDiv.innerHTML += validation;
+                } else {
+                    const error = await response.json();
+                    answerDiv.innerHTML = `<span class="error">❌ Ошибка: ${error.error}</span>`;
+                }
+            } catch (error) {
+                answerDiv.innerHTML = `<span class="error">❌ Ошибка сети: ${error.message}</span>`;
+            }
+        }
+
+        async function runAllTests() {
+            for (const test of testPrompts) {
+                await testSingle(test);
+                // Пауза между запросами
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        // Инициализация
+        renderTests();
+    </script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { MessageList } from '@/components/chat/message-list'
 import { MessageInput } from '@/components/chat/message-input'
 import { useChatContext } from '@/contexts/ChatContext'
@@ -10,18 +11,22 @@ import { Message } from '@/types/chat'
 export default function ChatPage() {
   const params = useParams()
   const chatId = params.chatId as string
-  
-  const { 
-    messages, 
-    loading, 
-    sendMessage, 
+
+  const {
+    messages,
+    loading,
+    sendMessage,
     currentChat,
-    loadChat
+    loadChat,
+    error,
   } = useChatContext()
 
-  // Загружаем чат при изменении chatId
+  const [isLoading, setIsLoading] = useState(loading)
+  
+  // загружаем чат при изменении chatId
   useEffect(() => {
     if (chatId && chatId !== currentChat?.id) {
+      setIsLoading(true)
       loadChat(chatId)
     }
   }, [chatId, currentChat?.id, loadChat])
@@ -30,7 +35,6 @@ export default function ChatPage() {
     await sendMessage(content, imageUrl, audioFile)
   }
 
-  // Конвертируем MessageResponse в Message для совместимости
   const convertedMessages: Message[] = messages.map(msg => ({
     id: msg.id,
     chatId: currentChat?.id || '',
@@ -45,13 +49,46 @@ export default function ChatPage() {
     conversationId: msg.conversationId,
     createdAt: new Date(msg.createdAt),
     editedAt: msg.editedAt ? new Date(msg.editedAt) : undefined,
-    isEdited: msg.isEdited
+    isEdited: msg.isEdited,
   }))
 
+  // Функция для обработки ошибок
+  const renderError = () => {
+    if (error) {
+      return (
+        <div className="text-center text-red-500">
+          <p>Ошибка загрузки чата. Попробуйте снова.</p>
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
-    <div className="flex flex-col h-full">
-      <MessageList messages={convertedMessages} isLoading={loading} />
-      <MessageInput onSendMessage={handleSendMessage} disabled={loading} />
+    <div className="flex flex-col h-full bg-[#0f0f0f]">
+      {/* message zone */}
+      <motion.div
+        className="flex-1 overflow-y-auto"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+      >
+        {renderError()}
+        <MessageList messages={convertedMessages} isLoading={isLoading} />
+      </motion.div>
+
+      {/* input zone */}
+      <motion.div
+        className="border-t border-gray-800 bg-gray-900/50 backdrop-blur-xl"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          disabled={isLoading}
+        />
+      </motion.div>
     </div>
   )
 }

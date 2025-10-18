@@ -20,12 +20,15 @@ export function RecordingIndicator({ isRecording, duration, className }: Recordi
   return (
     <div className={cn("flex items-center gap-2 text-red-500", className)}>
       <div className="flex items-center gap-1">
+        {/* Animated dots */}
         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
       </div>
+      
+      {/* Text with time display */}
       <span className="text-sm font-medium">Запись</span>
-      <span className="text-xs text-muted-foreground">{formatDuration(duration)}</span>
+      <span className="text-xs text-muted-foreground ml-2">{formatDuration(duration)}</span>
     </div>
   )
 }

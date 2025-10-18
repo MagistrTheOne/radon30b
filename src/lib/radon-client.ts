@@ -1,6 +1,7 @@
 /**
  * Radon AI API Client v2.0.0
- * Прямые вызовы к Radon AI API: http://213.219.215.235:8000/chat
+ * Интеграция с Production FastAPI Backend на H200 VM
+ * API: Production FastAPI Backend (URL from environment)
  * Поддержка новых параметров: enable_functions, personality, conversation_id, user_id
  */
 
@@ -63,7 +64,8 @@ export async function callRadonAPI(
     user_id
   } = options
 
-  const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+  // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
   
   try {
     // Если есть мультимодальные данные, используем FormData
@@ -230,7 +232,8 @@ export async function streamRadonAPI(
     user_id
   } = options
 
-  const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+  // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
 
   try {
     const response = await fetch(`${radonApiUrl}/chat`, {
@@ -341,7 +344,8 @@ export async function streamRadonAPI(
  */
 export async function checkRadonAPIHealth(): Promise<boolean> {
   try {
-    const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
     
     // Создаем AbortController для совместимости
     const controller = new AbortController()
@@ -369,7 +373,8 @@ export async function getRadonFunctions(): Promise<Array<{
   parameters: Record<string, unknown>
 }>> {
   try {
-    const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
     
     // Создаем AbortController для совместимости
     const controller = new AbortController()
@@ -403,7 +408,8 @@ export async function getRadonPersonalities(): Promise<Array<{
   description: string
 }>> {
   try {
-    const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
     
     // Создаем AbortController для совместимости
     const controller = new AbortController()
@@ -436,7 +442,8 @@ export async function createRadonConversation(userId: string): Promise<{
   created_at: string
 }> {
   try {
-    const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    // Клиентские вызовы идут через Next.js API routes
+  const radonApiUrl = '/api/radon'
     const response = await fetch(`${radonApiUrl}/conversations`, {
       method: 'POST',
       headers: {

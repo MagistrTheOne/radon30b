@@ -11,63 +11,68 @@ const plans = [
     name: "Free",
     price: "0",
     period: "навсегда",
-    description: "Идеально для знакомства с Radon AI",
+    description: "Бесплатный старт для знакомства с возможностями Radon AI",
     icon: Zap,
     badge: null,
     features: [
-      "10 запросов в день",
-      "Текстовая генерация",
-      "Анализ изображений",
-      "Базовая поддержка",
+      "До 25 запросов в день",
+      "Текстовая генерация и анализ",
+      "Базовая обработка изображений",
+      "Стандартная очередь запросов",
       "История чатов (7 дней)"
     ],
     limitations: [
-      "Ограниченная скорость",
-      "Нет приоритетной поддержки"
+      "Без API-доступа",
+      "Без приоритетной поддержки",
+      "Скорость отклика ограничена"
     ],
-    cta: "Начать бесплатно",
+    cta: "Попробовать бесплатно",
     href: "/sign-up",
     popular: false
   },
   {
     name: "Pro",
-    price: "19",
+    price: "39",
     period: "в месяц",
-    description: "Для профессионалов",
+    description: "Оптимальный выбор для активных пользователей и разработчиков",
     icon: Star,
     badge: "Популярный",
     features: [
       "Безлимитные запросы",
-      "Все типы генерации",
+      "Полная мультимодальная поддержка (текст + изображение + код)",
       "Приоритетная обработка",
-      "Расширенная история",
-      "Экспорт чатов",
-      "Приоритетная поддержка",
-      "API доступ (10K req/день)"
+      "История чатов (90 дней)",
+      "Экспорт диалогов и результатов",
+      "Доступ к Radon API (50K req/день)",
+      "Поддержка через Telegram/Email"
     ],
-    limitations: [],
-    cta: "Начать Pro",
+    limitations: [
+      "Без командных функций",
+      "API ограничен скоростью 2 req/сек"
+    ],
+    cta: "Активировать Pro",
     href: "/sign-up?plan=pro",
     popular: true
   },
   {
     name: "Team",
-    price: "99",
+    price: "149",
     period: "в месяц",
-    description: "Для команд до 10 участников",
+    description: "Командная работа с централизованным управлением и аналитикой",
     icon: Building2,
-    badge: null,
+    badge: "Для бизнеса",
     features: [
-      "Всё из Pro",
-      "Shared workspaces",
-      "Team management",
-      "Centralized billing",
-      "Role-based access",
-      "Team analytics",
-      "API доступ (100K req/день)"
+      "Все возможности Pro",
+      "Общий workspace для до 15 участников",
+      "Ролевое управление и права доступа",
+      "Централизованная оплата",
+      "Team analytics dashboard",
+      "Radon API (250K req/день)",
+      "Интеграция с Slack, Notion, GitHub",
+      "Приоритетная поддержка 24/7"
     ],
     limitations: [],
-    cta: "Начать Team",
+    cta: "Подключить Team",
     href: "/sign-up?plan=team",
     popular: false
   },
@@ -75,21 +80,21 @@ const plans = [
     name: "Enterprise",
     price: "Кастом",
     period: "по запросу",
-    description: "Для крупных организаций",
+    description: "Полный контроль, кастомизация и безопасность корпоративного уровня",
     icon: Crown,
     badge: "Корпоративный",
     features: [
-      "Все возможности Pro",
-      "Кастомные лимиты",
-      "Dedicated API",
-      "Персональный менеджер",
-      "SLA 99.9%",
+      "Все возможности Team",
+      "Неограниченные API-запросы",
+      "Dedicated модель и серверные кластеры",
+      "SLA 99.99% и персональный менеджер",
       "On-premise развертывание",
-      "Кастомная интеграция",
-      "Обучение команды"
+      "Интеграции под NDA",
+      "Адаптированное обучение модели под данные клиента",
+      "Обучение и консалтинг команды"
     ],
     limitations: [],
-    cta: "Связаться с нами",
+    cta: "Связаться с отделом продаж",
     href: "/contact",
     popular: false
   }
@@ -110,7 +115,8 @@ export function Pricing() {
             Простые и прозрачные <span className="text-primary">тарифы</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Выберите план, который подходит именно вам. Всегда можно изменить тариф или отменить подписку
+            Выберите уровень доступа к Radon AI — от старта до корпоративного масштаба.
+            Можно обновить план в любое время.
           </p>
         </motion.div>
 
@@ -124,18 +130,16 @@ export function Pricing() {
               viewport={{ once: true }}
               className="relative"
             >
-              {plan.popular && (
+              {plan.badge && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                  <Badge className={`px-4 py-1 ${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
                     {plan.badge}
                   </Badge>
                 </div>
               )}
               
               <Card className={`h-full relative overflow-hidden bg-card/80 backdrop-blur-md ${
-                plan.popular 
-                  ? 'border-primary shadow-lg scale-105' 
-                  : 'border-border'
+                plan.popular ? 'border-primary shadow-xl scale-105' : 'border-border'
               } transition-all duration-300`}>
                 <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
                 
@@ -187,7 +191,7 @@ export function Pricing() {
                     className={`w-full ${
                       plan.popular 
                         ? 'bg-white text-black hover:bg-gray-100 border-0' 
-                        : 'bg-gray-800 text-white hover:bg-gray-700 border-0'
+                        : 'bg-gray-900 text-white hover:bg-gray-800 border-0'
                     }`}
                     size="lg"
                   >
@@ -207,10 +211,16 @@ export function Pricing() {
           className="text-center mt-16"
         >
           <p className="text-muted-foreground mb-4">
-            Все планы включают 14-дневную гарантию возврата денег
+            Все платные тарифы включают 14-дневную гарантию возврата средств.
           </p>
           <p className="text-sm text-muted-foreground">
-            Нужна помощь с выбором? <button onClick={() => window.location.href = '/contact'} className="text-primary hover:underline cursor-pointer">Свяжитесь с нами</button>
+            Не уверены, какой тариф выбрать?{" "}
+            <button 
+              onClick={() => window.location.href = '/contact'} 
+              className="text-primary hover:underline cursor-pointer"
+            >
+              Свяжитесь с нами
+            </button>
           </p>
         </motion.div>
       </div>

@@ -11,7 +11,7 @@ export async function PUT(
 ) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -37,7 +37,10 @@ export async function PUT(
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        {
+          error: 'User not found',
+          details: 'Пользователь не найден в базе данных. Возможно, нужно выполнить синхронизацию пользователей.'
+        },
         { status: 404 }
       )
     }
@@ -129,7 +132,7 @@ export async function DELETE(
 ) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -146,7 +149,10 @@ export async function DELETE(
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        {
+          error: 'User not found',
+          details: 'Пользователь не найден в базе данных. Возможно, нужно выполнить синхронизацию пользователей.'
+        },
         { status: 404 }
       )
     }

@@ -81,14 +81,14 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-6">
             {/* Продукт */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200" aria-label="Продукт меню">
                 Продукт
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48">
                 {productMenu.map((item) => (
                   <DropdownMenuItem key={item.name} asChild>
-                    <Link href={item.href} className="flex items-center gap-2">
+                    <Link href={item.href} className="flex items-center gap-2" aria-label={item.name}>
                       <item.icon className="w-4 h-4" />
                       {item.name}
                     </Link>
@@ -99,14 +99,14 @@ export function Header() {
 
             {/* Поддержка */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200" aria-label="Поддержка меню">
                 Поддержка
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48">
                 {supportMenu.map((item) => (
                   <DropdownMenuItem key={item.name} asChild>
-                    <Link href={item.href} className="flex items-center gap-2">
+                    <Link href={item.href} className="flex items-center gap-2" aria-label={item.name}>
                       <item.icon className="w-4 h-4" />
                       {item.name}
                     </Link>
@@ -117,14 +117,14 @@ export function Header() {
 
             {/* Компания */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200" aria-label="Компания меню">
                 Компания
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48">
                 {companyMenu.map((item) => (
                   <DropdownMenuItem key={item.name} asChild>
-                    <Link href={item.href} className="flex items-center gap-2">
+                    <Link href={item.href} className="flex items-center gap-2" aria-label={item.name}>
                       <item.icon className="w-4 h-4" />
                       {item.name}
                     </Link>
@@ -135,14 +135,14 @@ export function Header() {
 
             {/* Правовая информация */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200" aria-label="Правовая информация меню">
                 Правовая информация
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 {legalMenu.map((item) => (
                   <DropdownMenuItem key={item.name} asChild>
-                    <Link href={item.href} className="flex items-center gap-2">
+                    <Link href={item.href} className="flex items-center gap-2" aria-label={item.name}>
                       <item.icon className="w-4 h-4" />
                       {item.name}
                     </Link>
@@ -185,6 +185,7 @@ export function Header() {
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="h-8 w-8"
+              aria-expanded={isMenuOpen ? 'true' : 'false'}
             >
               {isMenuOpen ? (
                 <X className="h-4 w-4" />
@@ -199,7 +200,7 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Продукт */}
+              {/* Prодукт */}
               <div className="px-3 py-2">
                 <div className="text-sm font-semibold text-foreground mb-2">Продукт</div>
                 <div className="space-y-1 ml-4">
@@ -271,6 +272,7 @@ export function Header() {
                 </div>
               </div>
               
+            
               <div className="pt-4 border-t border-border/50">
                 {isSignedIn ? (
                   <div className="space-y-2">

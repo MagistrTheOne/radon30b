@@ -98,10 +98,16 @@ export function Features() {
                 
                 <ul className="space-y-2">
                   {feature.benefits.map((benefit, benefitIndex) => (
-                    <li key={benefitIndex} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <motion.li 
+                      key={benefitIndex} 
+                      initial={{ opacity: 0, x: -20 }} 
+                      whileInView={{ opacity: 1, x: 0 }} 
+                      transition={{ delay: index * 0.1 + benefitIndex * 0.2, duration: 0.3 }}
+                      className="flex items-center gap-2 text-sm text-muted-foreground"
+                    >
                       <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                       {benefit}
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               </div>
