@@ -1,74 +1,79 @@
 import { relations } from "drizzle-orm/relations";
-import { teams, workspaces, users, subscriptions, usageLogs, teamMembers, messages, messageEdits, chats } from "./schema";
+import { team, workspace, chat, message, user, subscription, usageLog, teamMember, messageEdit } from "./schema";
 
-export const workspaceRelations = relations(workspaces, ({one}) => ({
-	team: one(teams, {
-		fields: [workspaces.teamId],
-		references: [teams.id]
+export const workspaceRelations = relations(workspace, ({one, many}) => ({
+	team: one(team, {
+		fields: [workspace.teamId],
+		references: [team.id]
+	}),
+	chats: many(chat),
+}));
+
+export const teamRelations = relations(team, ({one, many}) => ({
+	workspaces: many(workspace),
+	user: one(user, {
+		fields: [team.ownerId],
+		references: [user.id]
+	}),
+	teamMembers: many(teamMember),
+}));
+
+export const messageRelations = relations(message, ({one, many}) => ({
+	chat: one(chat, {
+		fields: [message.chatId],
+		references: [chat.id]
+	}),
+	messageEdits: many(messageEdit),
+}));
+
+export const chatRelations = relations(chat, ({one, many}) => ({
+	messages: many(message),
+	user: one(user, {
+		fields: [chat.userId],
+		references: [user.id]
+	}),
+	workspace: one(workspace, {
+		fields: [chat.workspaceId],
+		references: [workspace.id]
 	}),
 }));
 
-export const teamRelations = relations(teams, ({one, many}) => ({
-	workspaces: many(workspaces),
-	user: one(users, {
-		fields: [teams.ownerId],
-		references: [users.id]
-	}),
-	teamMembers: many(teamMembers),
-}));
-
-export const subscriptionRelations = relations(subscriptions, ({one}) => ({
-	user: one(users, {
-		fields: [subscriptions.userId],
-		references: [users.id]
+export const subscriptionRelations = relations(subscription, ({one}) => ({
+	user: one(user, {
+		fields: [subscription.userId],
+		references: [user.id]
 	}),
 }));
 
-export const userRelations = relations(users, ({many}) => ({
-	subscriptions: many(subscriptions),
-	usageLogs: many(usageLogs),
-	teams: many(teams),
-	teamMembers: many(teamMembers),
-	chats: many(chats),
+export const userRelations = relations(user, ({many}) => ({
+	subscriptions: many(subscription),
+	usageLogs: many(usageLog),
+	teams: many(team),
+	teamMembers: many(teamMember),
+	chats: many(chat),
 }));
 
-export const usageLogRelations = relations(usageLogs, ({one}) => ({
-	user: one(users, {
-		fields: [usageLogs.userId],
-		references: [users.id]
+export const usageLogRelations = relations(usageLog, ({one}) => ({
+	user: one(user, {
+		fields: [usageLog.userId],
+		references: [user.id]
 	}),
 }));
 
-export const teamMemberRelations = relations(teamMembers, ({one}) => ({
-	team: one(teams, {
-		fields: [teamMembers.teamId],
-		references: [teams.id]
+export const teamMemberRelations = relations(teamMember, ({one}) => ({
+	team: one(team, {
+		fields: [teamMember.teamId],
+		references: [team.id]
 	}),
-	user: one(users, {
-		fields: [teamMembers.userId],
-		references: [users.id]
-	}),
-}));
-
-export const messageEditRelations = relations(messageEdits, ({one}) => ({
-	message: one(messages, {
-		fields: [messageEdits.messageId],
-		references: [messages.id]
+	user: one(user, {
+		fields: [teamMember.userId],
+		references: [user.id]
 	}),
 }));
 
-export const messageRelations = relations(messages, ({one, many}) => ({
-	messageEdits: many(messageEdits),
-	chat: one(chats, {
-		fields: [messages.chatId],
-		references: [chats.id]
-	}),
-}));
-
-export const chatRelations = relations(chats, ({one, many}) => ({
-	messages: many(messages),
-	user: one(users, {
-		fields: [chats.userId],
-		references: [users.id]
+export const messageEditRelations = relations(messageEdit, ({one}) => ({
+	message: one(message, {
+		fields: [messageEdit.messageId],
+		references: [message.id]
 	}),
 }));
