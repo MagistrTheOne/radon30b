@@ -128,13 +128,13 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
 
   if (!messages || isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-400 p-8">
+      <div className="flex-1 flex items-center justify-center text-[#8e8ea0] p-8">
         <div className="text-center max-w-sm">
-          <div className="animate-spin w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <h3 className="text-lg font-medium text-gray-300 mb-2">
+          <div className="animate-spin w-8 h-8 border-2 border-[#8e8ea0] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium text-white mb-2">
             {isLoading ? 'Загрузка чата...' : 'Подготовка сообщений...'}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[#8e8ea0]">
             {isLoading ? 'Подождите, загружаем историю сообщений' : 'Обновляем содержимое чата'}
           </p>
         </div>
@@ -166,7 +166,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                     alt="avatar"
                   />
                   <AvatarFallback className={cn(
-                    isUser ? "bg-blue-600" : "bg-gray-700"
+                    isUser ? "bg-[#10a37f]" : "bg-[#2f2f2f]"
                   )}>
                     {isUser ? (
                       message.audioUrl ? (
@@ -175,7 +175,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                         <User className="w-4 h-4 text-white" />
                       )
                     ) : (
-                      <Bot className="w-4 h-4 text-gray-300" />
+                      <Bot className="w-4 h-4 text-white" />
                     )}
                   </AvatarFallback>
                 </Avatar>
@@ -190,8 +190,8 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                     className={cn(
                       "inline-block p-3 rounded-2xl transition-all duration-300 relative",
                       isUser
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "bg-gray-800 border border-gray-700 text-gray-100"
+                        ? "bg-[#10a37f] text-white shadow-lg"
+                        : "bg-[#2f2f2f] border border-[#404040] text-white"
                     )}
                   >
                     {/* image */}

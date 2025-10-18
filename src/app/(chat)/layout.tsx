@@ -22,9 +22,9 @@ export default function ChatLayout({
   return (
     <ErrorBoundary>
       <ChatProvider>
-        <div className="flex h-screen bg-[#0f0f0f]">
+        <div className="flex h-screen bg-[#212121]">
           {/* Desktop Sidebar */}
-          <div className="hidden md:flex md:w-80 md:flex-col border-r border-gray-800">
+          <div className="hidden md:flex md:w-64 md:flex-col bg-[#171717] border-r border-[#2f2f2f]">
             <ChatSidebar />
           </div>
 
@@ -34,14 +34,14 @@ export default function ChatLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden fixed top-4 left-4 z-50 bg-gray-800 hover:bg-gray-700 border border-gray-600"
+                className="md:hidden fixed top-4 left-4 z-50 bg-[#2f2f2f] hover:bg-[#404040] border border-[#404040]"
               >
                 <Menu className="h-5 w-5 text-gray-300" />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-80 p-0 bg-gray-900 border-gray-700"
+              className="w-64 p-0 bg-[#171717] border-[#2f2f2f]"
             >
               <ChatSidebar />
             </SheetContent>
@@ -50,10 +50,10 @@ export default function ChatLayout({
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Header */}
-            <header className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md">
+            <header className="flex items-center justify-between px-4 py-3 border-b border-[#2f2f2f] bg-[#212121]">
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-semibold text-gray-100">Radon AI</h1>
-                <span className="text-sm text-gray-400">
+                <h1 className="text-lg font-medium text-white">Radon AI</h1>
+                <span className="text-sm text-[#8e8ea0]">
                   {user?.emailAddresses[0]?.emailAddress}
                 </span>
               </div>
@@ -65,7 +65,7 @@ export default function ChatLayout({
             </header>
 
             {/* Chat Content */}
-            <main className="flex-1 overflow-hidden">
+            <main className="flex-1 overflow-hidden bg-[#212121]">
               {children}
             </main>
           </div>

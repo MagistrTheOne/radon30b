@@ -182,7 +182,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   const isLoading = disabled || isUploading
 
   return (
-    <div className="border-t border-gray-800 bg-gray-900/50 backdrop-blur-xl">
+    <div className="border-t border-[#2f2f2f] bg-[#212121]">
       <div className="max-w-4xl mx-auto p-3 space-y-3">
         {/* Image preview */}
         {imagePreview && (
@@ -258,8 +258,8 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               onKeyDown={handleKeyDown}
               placeholder="Сообщение Radon AI..."
               className={cn(
-                "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-400 focus:border-gray-600 focus:ring-gray-600 transition-colors",
-                imageFile || audioBlob ? "border-blue-500 focus:ring-blue-500" : ""
+                "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-[#2f2f2f] border-[#404040] text-white placeholder:text-[#8e8ea0] focus:border-[#10a37f] focus:ring-[#10a37f] transition-colors",
+                imageFile || audioBlob ? "border-[#10a37f] focus:ring-[#10a37f]" : ""
               )}
               disabled={isLoading}
             />
@@ -268,7 +268,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 hover:bg-gray-700 hover:text-gray-200 transition-all"
+                className="h-7 w-7 hover:bg-[#404040] hover:text-white transition-all"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
               >
@@ -279,7 +279,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 size="icon"
                 className={cn(
                   "h-7 w-7 transition-all",
-                  isRecording ? "text-red-400 hover:text-red-300" : "hover:text-gray-200"
+                  isRecording ? "text-red-400 hover:text-red-300" : "hover:text-white"
                 )}
                 onClick={handleAudioToggle}
                 disabled={isLoading}
@@ -290,7 +290,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShortcutsOpen(true)}
-                className="h-7 w-7 hover:text-gray-200"
+                className="h-7 w-7 hover:text-white"
               >
                 <HelpCircle className="w-3 h-3" />
               </Button>
@@ -312,8 +312,8 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
             className={cn(
               "h-11 w-11 rounded-xl transition-all shrink-0",
               canSend && !isLoading
-                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                ? "bg-[#10a37f] hover:bg-[#0d8f6b] text-white shadow-lg"
+                : "bg-[#2f2f2f] text-[#8e8ea0] cursor-not-allowed"
             )}
           >
             {isUploading ? (

@@ -147,17 +147,17 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
       {/* sidebar body */}
       <div
         className={cn(
-          "flex flex-col h-full border-r border-gray-800 overflow-hidden",
-          "bg-gray-900/95 backdrop-blur-xl"
+          "flex flex-col h-full border-r border-[#2f2f2f] overflow-hidden",
+          "bg-[#171717]"
         )}
       >
         {isOpen && (
           <>
             {/* Header */}
-            <div className="p-3 border-b border-gray-800 bg-gray-800/70">
+            <div className="p-3 border-b border-[#2f2f2f]">
               <Button
                 onClick={createNewChat}
-                className="w-full justify-start gap-2 bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600"
+                className="w-full justify-start gap-2 bg-[#2f2f2f] hover:bg-[#404040] text-white border-[#404040]"
                 size="lg"
               >
                 <Plus className="w-4 h-4" />
@@ -166,12 +166,12 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
             </div>
 
             {/* Usage Widget */}
-            <div className="p-3 border-b border-gray-800 bg-gray-800/60">
+            <div className="p-3 border-b border-[#2f2f2f]">
               <UsageWidget subscription={subscription} />
             </div>
 
             {/* Radon AI Status */}
-            <div className="p-3 border-b border-gray-800 bg-gray-800/60">
+            <div className="p-3 border-b border-[#2f2f2f]">
               <RadonStatus />
             </div>
 
@@ -181,14 +181,14 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                 {loading ? (
                   <MessageListSkeleton />
                 ) : Object.keys(groupedChats).length === 0 ? (
-                  <div className="text-center text-gray-400 py-8 animate-fade-in">
+                  <div className="text-center text-[#8e8ea0] py-8 animate-fade-in">
                     <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Нет чатов</p>
                   </div>
                 ) : (
                   Object.entries(groupedChats).map(([date, dateChats]) => (
                     <div key={date} className="space-y-1">
-                      <div className="flex items-center gap-2 px-2 text-gray-500">
+                      <div className="flex items-center gap-2 px-2 text-[#8e8ea0]">
                         <Calendar className="w-3 h-3" />
                         <span className="text-xs font-medium uppercase tracking-wide">
                           {date}
@@ -200,15 +200,15 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                           onClick={() => loadChat(chat.id)}
                           className={cn(
                             "group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all",
-                            "hover:bg-gray-800 active:scale-[0.99]"
+                            "hover:bg-[#2f2f2f] active:scale-[0.99]"
                           )}
                         >
-                          <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <MessageSquare className="w-4 h-4 text-[#8e8ea0] flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate text-gray-200">
+                            <p className="text-sm font-medium truncate text-white">
                               {chat.title}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[#8e8ea0]">
                               {chat.messageCount} сообщений
                             </p>
                           </div>

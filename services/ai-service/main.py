@@ -333,6 +333,150 @@ async def stream_radon_response(request_data: Dict[str, Any]):
         logger.error(f"Error streaming from Radon API: {str(e)}")
         yield f"data: {json.dumps({'error': 'Streaming error'})}\n\n"
 
+@app.get("/personalities")
+async def get_personalities():
+    """Get available AI personalities"""
+    return {
+        "personalities": {
+            "helpful": {
+                "name": "Helpful Radon",
+                "description": "Patient, thorough, and educational assistant",
+                "response_style": "detailed, educational, patient",
+                "tone": "encouraging, supportive, thorough"
+            },
+            "creative": {
+                "name": "Creative Radon",
+                "description": "Imaginative, expressive, and storytelling-focused assistant",
+                "response_style": "imaginative, expressive, storytelling",
+                "tone": "inspiring, artistic, engaging"
+            },
+            "technical": {
+                "name": "Technical Radon",
+                "description": "Precise, efficient, and code-focused assistant",
+                "response_style": "concise, precise, technical",
+                "tone": "professional, direct, efficient"
+            }
+        }
+    }
+
+@app.get("/functions")
+async def get_functions():
+    """Get available AI functions"""
+    return {
+        "functions": [
+            {
+                "name": "calculate",
+                "description": "Perform mathematical calculations",
+                "parameters": {
+                    "expression": {
+                        "type": "string",
+                        "description": "Mathematical expression to evaluate"
+                    }
+                }
+            },
+            {
+                "name": "get_time",
+                "description": "Get current time",
+                "parameters": {
+                    "timezone": {
+                        "type": "string",
+                        "description": "Timezone (default: local)"
+                    }
+                }
+            },
+            {
+                "name": "get_date",
+                "description": "Get current date",
+                "parameters": {
+                    "format": {
+                        "type": "string",
+                        "description": "Date format (default: YYYY-MM-DD)"
+                    }
+                }
+            },
+            {
+                "name": "search_web",
+                "description": "Search the web for information",
+                "parameters": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of results (default: 5)"
+                    }
+                }
+            },
+            {
+                "name": "get_weather",
+                "description": "Get weather information",
+                "parameters": {
+                    "location": {
+                        "type": "string",
+                        "description": "City name or coordinates"
+                    },
+                    "units": {
+                        "type": "string",
+                        "description": "Temperature units (celsius/fahrenheit)"
+                    }
+                }
+            },
+            {
+                "name": "convert_currency",
+                "description": "Convert between currencies",
+                "parameters": {
+                    "amount": {
+                        "type": "number",
+                        "description": "Amount to convert"
+                    },
+                    "from_currency": {
+                        "type": "string",
+                        "description": "Source currency code"
+                    },
+                    "to_currency": {
+                        "type": "string",
+                        "description": "Target currency code"
+                    }
+                }
+            },
+            {
+                "name": "generate_uuid",
+                "description": "Generate a UUID",
+                "parameters": {}
+            },
+            {
+                "name": "hash_text",
+                "description": "Hash text using various algorithms",
+                "parameters": {
+                    "text": {
+                        "type": "string",
+                        "description": "Text to hash"
+                    },
+                    "algorithm": {
+                        "type": "string",
+                        "description": "Hash algorithm (md5, sha1, sha256)"
+                    }
+                }
+            }
+        ],
+        "schema": {
+            "type": "object",
+            "properties": {
+                "function": {
+                    "type": "string",
+                    "enum": ["calculate", "get_time", "get_date", "search_web", "get_weather", "convert_currency", "generate_uuid", "hash_text"],
+                    "description": "Name of the function to call"
+                },
+                "parameters": {
+                    "type": "object",
+                    "description": "Function parameters"
+                }
+            },
+            "required": ["function"]
+        }
+    }
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
@@ -376,8 +520,8 @@ async def get_metrics():
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     }
 
-@app.post("/inference", response_model=InferenceResponse)
-async def inference(request: InferenceRequest):
+@app.post("/chat", response_model=InferenceResponse)
+async def chat(request: InferenceRequest):
     """Generate AI response"""
     start_time = time.time()
     
@@ -423,8 +567,8 @@ async def inference(request: InferenceRequest):
         logger.error(f"Inference error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/inference/stream")
-async def inference_stream(request: InferenceRequest):
+@app.post("/chat/stream")
+async def chat_stream(request: InferenceRequest):
     """Stream AI response"""
     try:
         # Prepare request data

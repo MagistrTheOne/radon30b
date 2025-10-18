@@ -38,21 +38,21 @@ export default function ChatPage() {
 
   if (!currentChat) {
     return (
-      <div className="flex flex-col h-full bg-[#0f0f0f]">
-        <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-400 p-8">
+      <div className="flex flex-col h-full bg-[#212121]">
+        <div className="flex flex-1 flex-col items-center justify-center text-center text-[#8e8ea0] p-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center max-w-md"
           >
-            <div className="w-20 h-20 mb-6 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
-              <Bot className="w-10 h-10 text-gray-300" />
+            <div className="w-20 h-20 mb-6 rounded-full bg-[#2f2f2f] flex items-center justify-center border border-[#404040]">
+              <Bot className="w-10 h-10 text-[#10a37f]" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-200 mb-3">
+            <h2 className="text-xl font-semibold text-white mb-3">
               Добро пожаловать в Radon AI
             </h2>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <p className="text-sm text-[#8e8ea0] leading-relaxed">
               Начните новый разговор или выберите существующий чат из боковой панели
             </p>
           </motion.div>
@@ -62,7 +62,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0f0f0f]">
+    <div className="flex flex-col h-full bg-[#212121]">
       <MessageList messages={convertedMessages} isLoading={loading} />
       <MessageInput onSendMessage={handleSendMessage} disabled={loading} />
     </div>

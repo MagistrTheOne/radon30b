@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // Найти пользователя в БД по Clerk ID
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: userId }
     })
 
@@ -40,6 +40,8 @@ export async function GET(_request: NextRequest) {
           }
         })
         console.log(`✅ Пользователь создан: ${newUser.id}`)
+        // Обновляем переменную user для дальнейшего использования
+        user = newUser
       } catch (createError) {
         console.error('❌ Ошибка создания пользователя:', createError)
         return NextResponse.json(
@@ -54,7 +56,7 @@ export async function GET(_request: NextRequest) {
 
     // Получить чаты пользователя с подсчетом сообщений
     const chats = await prisma.chat.findMany({
-      where: { userId: user.id },
+      where: { userId: user!.id },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Найти пользователя в БД по Clerk ID
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: userId }
     })
 
@@ -130,6 +132,8 @@ export async function POST(request: NextRequest) {
           }
         })
         console.log(`✅ Пользователь создан: ${newUser.id}`)
+        // Обновляем переменную user для дальнейшего использования
+        user = newUser
       } catch (createError) {
         console.error('❌ Ошибка создания пользователя:', createError)
         return NextResponse.json(
@@ -145,7 +149,7 @@ export async function POST(request: NextRequest) {
     // Создать новый чат
     const chat = await prisma.chat.create({
       data: {
-        userId: user.id,
+        userId: user!.id,
         title: title.trim()
       }
     })
