@@ -13,7 +13,6 @@ import {
   Mail, 
   Crown, 
   User, 
-  Settings,
   Trash2,
   Loader2,
   Building2

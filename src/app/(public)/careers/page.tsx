@@ -11,7 +11,6 @@ import {
   Heart,
   Zap,
   Brain,
-  Code,
   Shield,
   Globe,
   Coffee,

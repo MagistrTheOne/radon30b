@@ -6,7 +6,6 @@ import {
   Brain, 
   MapPin, 
   Calendar, 
-  Target, 
   Users, 
   Zap,
   Shield,

@@ -42,7 +42,7 @@ export class RedisPubSub {
   }
 
   // Publish event to channel
-  async publish(channel: string, data: any): Promise<void> {
+  async publish(channel: string, data: unknown): Promise<void> {
     try {
       await this.publisher.publish(channel, JSON.stringify(data))
     } catch (error) {
@@ -51,7 +51,7 @@ export class RedisPubSub {
   }
 
   // Subscribe to channel
-  async subscribe(channel: string, callback: (data: any) => void): Promise<void> {
+  async subscribe(channel: string, callback: (data: unknown) => void): Promise<void> {
     try {
       await this.subscriber.subscribe(channel)
       this.subscriber.on('message', (receivedChannel, message) => {
@@ -96,7 +96,7 @@ export class RedisCache {
   }
 
   // Set cache with TTL
-  async set(key: string, value: any, ttlSeconds?: number): Promise<void> {
+  async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
     try {
       const serialized = JSON.stringify(value)
       if (ttlSeconds) {
@@ -141,7 +141,7 @@ export class RedisCache {
   }
 
   // Set multiple keys
-  async mset(keyValuePairs: Record<string, any>): Promise<void> {
+  async mset(keyValuePairs: Record<string, unknown>): Promise<void> {
     try {
       const serializedPairs: string[] = []
       for (const [key, value] of Object.entries(keyValuePairs)) {

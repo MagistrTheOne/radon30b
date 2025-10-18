@@ -1,9 +1,9 @@
 import axios, { AxiosResponse } from 'axios'
 
-// Qwen3-Omni API client
+// Qwen3-Omni API client - используем API Gateway
 const qwenApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'http://localhost:8001',
-  timeout: 120000, // 2 minutes for AI processing
+  baseURL: process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000',
+  timeout: 300000, // 5 minutes for AI processing
   headers: {
     'Content-Type': 'application/json',
   },
@@ -52,7 +52,7 @@ export interface QwenResponse {
 export interface QwenInferenceResponse {
   response: string
   conversation_id?: string
-  function_calls?: any
+  function_calls?: unknown
   personality_used?: string
   tokens_used?: number
   processing_time: number
@@ -64,7 +64,7 @@ export const qwenApiClient = {
   // Multimodal inference with Qwen3-Omni
   async multimodalInference(request: QwenMultimodalRequest): Promise<QwenInferenceResponse> {
     try {
-      const response: AxiosResponse<QwenInferenceResponse> = await qwenApi.post('/multimodal', request)
+      const response: AxiosResponse<QwenInferenceResponse> = await qwenApi.post('/api/ai/multimodal', request)
       return response.data
     } catch (error) {
       console.error('Qwen multimodal inference error:', error)
@@ -75,7 +75,7 @@ export const qwenApiClient = {
   // Direct conversation with Qwen3-Omni
   async conversation(request: QwenConversationRequest): Promise<QwenResponse> {
     try {
-      const response: AxiosResponse<QwenResponse> = await qwenApi.post('/qwen/conversation', request)
+      const response: AxiosResponse<QwenResponse> = await qwenApi.post('/api/ai/qwen/conversation', request)
       return response.data
     } catch (error) {
       console.error('Qwen conversation error:', error)
@@ -109,7 +109,7 @@ export const qwenApiClient = {
       formData.append('max_new_tokens', max_new_tokens.toString())
       formData.append('temperature', temperature.toString())
 
-      const response: AxiosResponse<QwenResponse> = await qwenApi.post('/qwen/upload', formData, {
+      const response: AxiosResponse<QwenResponse> = await qwenApi.post('/api/ai/qwen/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 /**
  * GET /api/chats - получить список чатов текущего пользователя
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { userId } = await auth()
     
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Преобразовать в формат, ожидаемый фронтендом
-    const formattedChats = chats.map((chat: any) => ({
+    const formattedChats = chats.map((chat: { id: string; title: string; createdAt: Date; _count: { messages: number } }) => ({
       id: chat.id,
       title: chat.title,
       createdAt: chat.createdAt.toISOString(),

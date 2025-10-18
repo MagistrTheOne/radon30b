@@ -12,7 +12,6 @@ import {
   Bell, 
   Shield, 
   Palette, 
-  Globe, 
   Database,
   Zap,
   Crown,
@@ -71,19 +70,25 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     setSettings({
-      theme: 'dark',
-      language: 'ru',
       notifications: {
         email: true,
         push: true,
-        sound: true
+        chat: true,
+        updates: true
       },
       privacy: {
-        profileVisibility: 'private',
-        dataSharing: false
+        dataCollection: false,
+        analytics: false,
+        cookies: false
+      },
+      appearance: {
+        theme: 'dark',
+        fontSize: 'medium',
+        animations: true
       },
       ai: {
-        personality: 'helpful',
+        model: 'radon-30b',
+        temperature: 0.7,
         maxTokens: 2048,
         streaming: true
       }

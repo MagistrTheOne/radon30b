@@ -1,4 +1,4 @@
-import { apiClient } from './api-client'
+import { nextApiClient } from './api-client'
 
 export interface SubscriptionResponse {
   id: string
@@ -37,16 +37,16 @@ export interface PortalSessionResponse {
 
 export const subscriptionApi = {
   getCurrentSubscription: () => 
-    apiClient.get<SubscriptionResponse>('/api/subscription'),
+    nextApiClient.get<SubscriptionResponse>('/api/subscription'),
   
   createCheckoutSession: (tier: string) =>
-    apiClient.post<CheckoutSessionResponse>('/api/subscription/checkout', { tier }),
+    nextApiClient.post<CheckoutSessionResponse>('/api/subscription/checkout', { tier }),
   
   createPortalSession: () =>
-    apiClient.post<PortalSessionResponse>('/api/subscription/portal'),
+    nextApiClient.post<PortalSessionResponse>('/api/subscription/portal'),
   
   getUsageStats: (period: string = '30d') =>
-    apiClient.get<UsageStatsResponse>(`/api/usage?period=${period}`)
+    nextApiClient.get<UsageStatsResponse>(`/api/usage?period=${period}`)
 }
 
 export default subscriptionApi

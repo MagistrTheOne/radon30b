@@ -1,4 +1,4 @@
-import { apiClient } from './api-client'
+import { nextApiClient } from './api-client'
 
 export interface TeamResponse {
   id: string
@@ -44,40 +44,40 @@ export interface CreateWorkspaceRequest {
 
 export const teamApi = {
   createTeam: (data: CreateTeamRequest) =>
-    apiClient.post<TeamResponse>('/api/teams', data),
+    nextApiClient.post<TeamResponse>('/api/teams', data),
   
   getTeams: () =>
-    apiClient.get<TeamResponse[]>('/api/teams'),
+    nextApiClient.get<TeamResponse[]>('/api/teams'),
   
   getTeam: (teamId: string) =>
-    apiClient.get<TeamResponse>(`/api/teams/${teamId}`),
+    nextApiClient.get<TeamResponse>(`/api/teams/${teamId}`),
   
   updateTeam: (teamId: string, data: Partial<CreateTeamRequest>) =>
-    apiClient.put<TeamResponse>(`/api/teams/${teamId}`, data),
+    nextApiClient.put<TeamResponse>(`/api/teams/${teamId}`, data),
   
   deleteTeam: (teamId: string) =>
-    apiClient.delete(`/api/teams/${teamId}`),
+    nextApiClient.delete(`/api/teams/${teamId}`),
   
   inviteMember: (teamId: string, data: InviteMemberRequest) =>
-    apiClient.post<TeamMemberResponse>(`/api/teams/${teamId}/invite`, data),
+    nextApiClient.post<TeamMemberResponse>(`/api/teams/${teamId}/invite`, data),
   
   removeMember: (teamId: string, userId: string) =>
-    apiClient.delete(`/api/teams/${teamId}/members/${userId}`),
+    nextApiClient.delete(`/api/teams/${teamId}/members/${userId}`),
   
   getTeamMembers: (teamId: string) =>
-    apiClient.get<TeamMemberResponse[]>(`/api/teams/${teamId}/members`),
+    nextApiClient.get<TeamMemberResponse[]>(`/api/teams/${teamId}/members`),
   
   updateMemberRole: (teamId: string, userId: string, role: string) =>
-    apiClient.put<TeamMemberResponse>(`/api/teams/${teamId}/members/${userId}`, { role }),
+    nextApiClient.put<TeamMemberResponse>(`/api/teams/${teamId}/members/${userId}`, { role }),
   
   createWorkspace: (teamId: string, data: CreateWorkspaceRequest) =>
-    apiClient.post<WorkspaceResponse>(`/api/teams/${teamId}/workspaces`, data),
+    nextApiClient.post<WorkspaceResponse>(`/api/teams/${teamId}/workspaces`, data),
   
   getWorkspaces: (teamId: string) =>
-    apiClient.get<WorkspaceResponse[]>(`/api/teams/${teamId}/workspaces`),
+    nextApiClient.get<WorkspaceResponse[]>(`/api/teams/${teamId}/workspaces`),
   
   deleteWorkspace: (teamId: string, workspaceId: string) =>
-    apiClient.delete(`/api/teams/${teamId}/workspaces/${workspaceId}`)
+    nextApiClient.delete(`/api/teams/${teamId}/workspaces/${workspaceId}`)
 }
 
 export default teamApi

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
@@ -193,9 +194,11 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
         {imagePreview && (
           <Card className="mb-4 p-4">
             <div className="flex items-start gap-3">
-              <img
+              <Image
                 src={imagePreview}
                 alt="Preview"
+                width={80}
+                height={80}
                 className="w-20 h-20 object-cover rounded-lg"
               />
               <div className="flex-1">

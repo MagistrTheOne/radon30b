@@ -342,11 +342,17 @@ export async function streamRadonAPI(
 export async function checkRadonAPIHealth(): Promise<boolean> {
   try {
     const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    
+    // Создаем AbortController для совместимости
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 секунд таймаут
+    
     const response = await fetch(`${radonApiUrl}/health`, {
       method: 'GET',
-      signal: AbortSignal.timeout(5000) // 5 секунд таймаут
+      signal: controller.signal
     })
     
+    clearTimeout(timeoutId)
     return response.ok
   } catch (error) {
     console.error('Radon API health check failed:', error)
@@ -364,10 +370,17 @@ export async function getRadonFunctions(): Promise<Array<{
 }>> {
   try {
     const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    
+    // Создаем AbortController для совместимости
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    
     const response = await fetch(`${radonApiUrl}/functions`, {
       method: 'GET',
-      signal: AbortSignal.timeout(5000)
+      signal: controller.signal
     })
+    
+    clearTimeout(timeoutId)
     
     if (!response.ok) {
       throw new Error(`Functions API error: ${response.status} ${response.statusText}`)
@@ -391,10 +404,17 @@ export async function getRadonPersonalities(): Promise<Array<{
 }>> {
   try {
     const radonApiUrl = process.env.NEXT_PUBLIC_RADON_API_URL || 'http://213.219.215.235:8000'
+    
+    // Создаем AbortController для совместимости
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    
     const response = await fetch(`${radonApiUrl}/personalities`, {
       method: 'GET',
-      signal: AbortSignal.timeout(5000)
+      signal: controller.signal
     })
+    
+    clearTimeout(timeoutId)
     
     if (!response.ok) {
       throw new Error(`Personalities API error: ${response.status} ${response.statusText}`)

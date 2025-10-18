@@ -12,9 +12,7 @@ import {
   Building2, 
   Check, 
   X, 
-  Calendar,
   CreditCard,
-  TrendingUp,
   BarChart3,
   ArrowRight,
   Loader2

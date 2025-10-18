@@ -8,7 +8,6 @@ import {
   Search, 
   Calendar, 
   User, 
-  Tag, 
   ArrowRight,
   BookOpen,
   TrendingUp,

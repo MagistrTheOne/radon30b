@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Message } from '@/types/chat'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -16,9 +17,9 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useTheme } from 'next-themes'
 import { useChatContext } from '@/contexts/ChatContext'
 import { MessageHistoryDialog } from './message-history-dialog'
-import { MessageListSkeleton, LoadingIndicator } from '@/components/loading-states'
+import { LoadingIndicator } from '@/components/loading-states'
 import { AudioPlayer } from './audio-player'
-import { FunctionCallDisplay, FunctionCall } from './function-call-display'
+import { FunctionCallDisplay } from './function-call-display'
 
 interface MessageListProps {
   messages: Message[]
@@ -76,7 +77,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
     try {
       await navigator.clipboard.writeText(text)
       toast.success('Скопировано в буфер обмена')
-    } catch (error) {
+    } catch {
       toast.error('Ошибка копирования')
     }
   }
@@ -90,7 +91,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          code(props: any) {
+          code(props: { className?: string; children?: React.ReactNode }) {
             const { className, children } = props
             const match = /language-(\w+)/.exec(className || '')
             const isInline = !match
@@ -168,11 +169,14 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                   }`}
                 >
                   {message.imageUrl && (
-                    <div className="mb-3">
-                      <img
+                    <div className="mb-3 relative w-full h-auto">
+                      <Image
                         src={message.imageUrl}
                         alt="Uploaded content"
+                        width={500}
+                        height={300}
                         className="max-w-full h-auto rounded-lg"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </div>
                   )}
