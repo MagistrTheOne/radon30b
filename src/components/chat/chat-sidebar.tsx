@@ -25,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useUser } from "@clerk/nextjs"
+import { useUser, useClerk } from "@clerk/nextjs"
 import Link from "next/link"
 import { format, isToday, isYesterday, isThisWeek } from "date-fns"
 import { ru } from "date-fns/locale"
@@ -51,6 +51,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
   >("free")
 
   const { user } = useUser()
+  const { signOut } = useClerk()
   const { chats, loading, createChat, deleteChat, updateChat, loadChat } =
     useChatContext()
 
@@ -198,7 +199,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                                 Переименовать
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                className="text-destructive"
+                                className="text-red-400 hover:text-red-300"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleDeleteChat(chat.id)
@@ -248,36 +249,27 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem asChild>
-                      <Link href="/settings">
+                      <Link href="/dashboard">
                         <Settings className="w-4 h-4 mr-2" />
                         Настройки
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/subscription">
+                      <Link href="/dashboard">
                         <Crown className="w-4 h-4 mr-2" />
                         Подписка
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/team">
-                        <Users className="w-4 h-4 mr-2" />
-                        Команды
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/analytics">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Аналитика
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
+                      <Link href="/dashboard">
                         <User className="w-4 h-4 mr-2" />
                         Профиль
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem 
+                      className="text-red-400 hover:text-red-300"
+                      onClick={() => signOut()}
+                    >
                       <LogOut className="w-4 h-4 mr-2" />
                       Выйти
                     </DropdownMenuItem>

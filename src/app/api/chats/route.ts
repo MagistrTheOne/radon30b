@@ -17,9 +17,21 @@ export async function GET(_request: NextRequest) {
     }
 
     // Найти пользователя в БД по Clerk ID
-    let user = await prisma.user.findUnique({
-      where: { clerkId: userId }
-    })
+    let user
+    try {
+      user = await prisma.user.findUnique({
+        where: { clerkId: userId }
+      })
+    } catch (dbError) {
+      console.error('❌ Ошибка подключения к базе данных:', dbError)
+      return NextResponse.json(
+        {
+          error: 'Database connection error',
+          details: 'База данных временно недоступна. Попробуйте позже.'
+        },
+        { status: 503 }
+      )
+    }
 
     if (!user) {
       // Автоматически создаем пользователя при первом запросе
@@ -117,9 +129,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Найти пользователя в БД по Clerk ID
-    let user = await prisma.user.findUnique({
-      where: { clerkId: userId }
-    })
+    let user
+    try {
+      user = await prisma.user.findUnique({
+        where: { clerkId: userId }
+      })
+    } catch (dbError) {
+      console.error('❌ Ошибка подключения к базе данных:', dbError)
+      return NextResponse.json(
+        {
+          error: 'Database connection error',
+          details: 'База данных временно недоступна. Попробуйте позже.'
+        },
+        { status: 503 }
+      )
+    }
 
     if (!user) {
       // Автоматически создаем пользователя при первом запросе

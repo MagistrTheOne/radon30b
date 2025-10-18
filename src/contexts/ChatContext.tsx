@@ -206,7 +206,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки чата'
       setError(errorMessage)
       console.error('Error loading chat:', error)
-      toast.error(errorMessage)
+      
+      // Если база данных недоступна, показываем специальное сообщение
+      if (errorMessage.includes('Database connection error') || errorMessage.includes('503')) {
+        toast.error('База данных временно недоступна. Попробуйте позже.')
+      } else {
+        toast.error(errorMessage)
+      }
     } finally {
       setLoading(false)
     }
