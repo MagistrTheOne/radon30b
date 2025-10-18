@@ -21,19 +21,7 @@ export async function GET(_request: NextRequest) {
     let user
     try {
       user = await db.query.users.findFirst({
-        where: eq(users.clerkId, userId),
-        with: {
-          chats: {
-            orderBy: (chats, { desc }) => [desc(chats.createdAt)],
-            with: {
-              messages: {
-                columns: {
-                  id: true,
-                }
-              }
-            }
-          }
-        }
+        where: eq(users.clerkId, userId)
       })
     } catch (dbError) {
       console.error('❌ Ошибка подключения к базе данных:', dbError)
@@ -83,13 +71,26 @@ export async function GET(_request: NextRequest) {
       }
     }
 
+    // Получаем чаты пользователя отдельным запросом
+    const userChats = await db.query.chats.findMany({
+      where: eq(chats.userId, user.id),
+      orderBy: (chats, { desc }) => [desc(chats.createdAt)],
+      with: {
+        messages: {
+          columns: {
+            id: true,
+          }
+        }
+      }
+    })
+
     // Форматируем чаты для фронтенда
-    const formattedChats = user.chats?.map((chat) => ({
+    const formattedChats = userChats.map((chat) => ({
       id: chat.id,
       title: chat.title,
       createdAt: chat.createdAt.toISOString(),
       messageCount: chat.messages?.length || 0
-    })) || []
+    }))
 
     return NextResponse.json(formattedChats)
 
