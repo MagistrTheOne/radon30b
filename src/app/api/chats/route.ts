@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
 /**
@@ -25,10 +25,18 @@ export async function GET(_request: NextRequest) {
       // Автоматически создаем пользователя при первом запросе
       console.log(`👤 Создаем пользователя для Clerk ID: ${userId}`)
       try {
+        // Получаем данные пользователя из Clerk
+        const clerkUser = await currentUser()
+        const userEmail = clerkUser?.emailAddresses[0]?.emailAddress || `${userId}@radon.ai`
+        const userName = clerkUser?.firstName && clerkUser?.lastName 
+          ? `${clerkUser.firstName} ${clerkUser.lastName}`
+          : clerkUser?.firstName || 'Пользователь'
+
         const newUser = await prisma.user.create({
           data: {
             clerkId: userId,
-            email: `${userId}@example.com`,
+            email: userEmail,
+            name: userName,
             role: 'user',
             subscriptionData: {
               create: {
@@ -39,7 +47,7 @@ export async function GET(_request: NextRequest) {
             }
           }
         })
-        console.log(`✅ Пользователь создан: ${newUser.id}`)
+        console.log(`✅ Пользователь создан: ${newUser.id} (${userEmail})`)
         // Обновляем переменную user для дальнейшего использования
         user = newUser
       } catch (createError) {
@@ -117,10 +125,18 @@ export async function POST(request: NextRequest) {
       // Автоматически создаем пользователя при первом запросе
       console.log(`👤 Создаем пользователя для Clerk ID: ${userId}`)
       try {
+        // Получаем данные пользователя из Clerk
+        const clerkUser = await currentUser()
+        const userEmail = clerkUser?.emailAddresses[0]?.emailAddress || `${userId}@radon.ai`
+        const userName = clerkUser?.firstName && clerkUser?.lastName 
+          ? `${clerkUser.firstName} ${clerkUser.lastName}`
+          : clerkUser?.firstName || 'Пользователь'
+
         const newUser = await prisma.user.create({
           data: {
             clerkId: userId,
-            email: `${userId}@example.com`,
+            email: userEmail,
+            name: userName,
             role: 'user',
             subscriptionData: {
               create: {
@@ -131,7 +147,7 @@ export async function POST(request: NextRequest) {
             }
           }
         })
-        console.log(`✅ Пользователь создан: ${newUser.id}`)
+        console.log(`✅ Пользователь создан: ${newUser.id} (${userEmail})`)
         // Обновляем переменную user для дальнейшего использования
         user = newUser
       } catch (createError) {

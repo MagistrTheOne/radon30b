@@ -34,9 +34,9 @@ export default function ChatLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden fixed top-4 left-4 z-50 bg-[#2f2f2f] hover:bg-[#404040] border border-[#404040]"
+                className="md:hidden fixed top-4 left-4 z-50 bg-[#2f2f2f] hover:bg-[#404040] border border-[#404040] text-white"
               >
-                <Menu className="h-5 w-5 text-gray-300" />
+                <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent

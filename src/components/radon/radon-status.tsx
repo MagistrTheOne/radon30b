@@ -122,11 +122,11 @@ export function RadonStatus() {
   }
 
   return (
-    <Card className="p-4 bg-card/60 backdrop-blur-sm border border-border/50 transition-all duration-300">
+    <Card className="p-4 bg-[#2f2f2f]/80 border-[#404040] transition-all duration-300 backdrop-blur-md shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {getStatusIcon()}
-          <span className="text-sm font-medium">Radon AI Status</span>
+          <span className="text-sm font-medium text-white">Radon AI Status</span>
         </div>
         <div className="flex items-center gap-2">
           {getStatusBadge()}
@@ -175,11 +175,11 @@ export function RadonStatus() {
             {status.response_time && (
               <div className="flex items-center justify-between">
                 <span>Response:</span>
-                <span className="text-muted-foreground">{status.response_time} ms</span>
+                <span className="text-[#8e8ea0]">{status.response_time} ms</span>
               </div>
             )}
 
-            <div className="flex items-center justify-between text-muted-foreground">
+            <div className="flex items-center justify-between text-[#8e8ea0]">
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 <span>Uptime:</span>
@@ -213,7 +213,7 @@ export function RadonStatus() {
       </AnimatePresence>
 
       {status.last_check && (
-        <div className="text-xs text-muted-foreground mt-3 text-right">
+        <div className="text-xs text-[#8e8ea0] mt-3 text-right">
           Последняя проверка: {status.last_check}
         </div>
       )}

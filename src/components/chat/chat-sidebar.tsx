@@ -18,8 +18,6 @@ import {
   User,
   Users,
   BarChart3,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -46,7 +44,6 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [chatToRename, setChatToRename] = useState<ChatResponse | null>(null)
   const [subscription, setSubscription] = useState<
@@ -121,43 +118,12 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
   }[subscription]
 
   return (
-    <div
-      className={cn(
-        "relative h-full transition-all duration-500 ease-in-out",
-        isOpen ? "w-72 sm:w-64" : "w-12"
-      )}
-    >
-      {/* toggle button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "absolute -right-3 top-4 z-20 rounded-full border border-border/40 backdrop-blur-md bg-background/60 shadow-sm",
-          "hover:scale-110 transition-transform"
-        )}
-      >
-        {isOpen ? (
-          <ChevronLeft className="w-4 h-4" />
-        ) : (
-          <ChevronRight className="w-4 h-4" />
-        )}
-      </Button>
-
-      {/* sidebar body */}
-      <div
-        className={cn(
-          "flex flex-col h-full border-r border-[#2f2f2f] overflow-hidden",
-          "bg-[#171717]"
-        )}
-      >
-        {isOpen && (
-          <>
-            {/* Header */}
-            <div className="p-3 border-b border-[#2f2f2f]">
+    <div className="flex flex-col h-full bg-[#171717] border-r border-[#2f2f2f] overflow-hidden">
+      {/* Header */}
+            <div className="p-4 border-b border-[#2f2f2f]">
               <Button
                 onClick={createNewChat}
-                className="w-full justify-start gap-2 bg-[#2f2f2f] hover:bg-[#404040] text-white border-[#404040]"
+                className="w-full justify-start gap-2 bg-[#2f2f2f]/80 hover:bg-[#404040]/80 text-white border-[#404040] transition-all duration-200 backdrop-blur-md shadow-lg hover:shadow-xl"
                 size="lg"
               >
                 <Plus className="w-4 h-4" />
@@ -166,18 +132,18 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
             </div>
 
             {/* Usage Widget */}
-            <div className="p-3 border-b border-[#2f2f2f]">
+            <div className="p-4 border-b border-[#2f2f2f]">
               <UsageWidget subscription={subscription} />
             </div>
 
             {/* Radon AI Status */}
-            <div className="p-3 border-b border-[#2f2f2f]">
+            <div className="p-4 border-b border-[#2f2f2f]">
               <RadonStatus />
             </div>
 
             {/* Chats */}
             <ScrollArea className="flex-1">
-              <div className="p-3 space-y-4">
+              <div className="p-4 space-y-3">
                 {loading ? (
                   <MessageListSkeleton />
                 ) : Object.keys(groupedChats).length === 0 ? (
@@ -200,7 +166,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                           onClick={() => loadChat(chat.id)}
                           className={cn(
                             "group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all",
-                            "hover:bg-[#2f2f2f] active:scale-[0.99]"
+                            "hover:bg-[#2f2f2f]/80 active:scale-[0.99] backdrop-blur-sm transition-all"
                           )}
                         >
                           <MessageSquare className="w-4 h-4 text-[#8e8ea0] flex-shrink-0" />
@@ -252,7 +218,7 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
             </ScrollArea>
 
             {/* User Section */}
-            <div className="p-3 border-t border-gray-800 bg-gray-800/70 backdrop-blur-sm">
+            <div className="p-4 border-t border-[#2f2f2f] bg-[#1a1a1a] backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={user?.imageUrl} />
@@ -264,12 +230,12 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-gray-200">
+                  <p className="text-sm font-medium truncate text-white">
                     {user?.firstName && user?.lastName
                       ? `${user.firstName} ${user.lastName}`
                       : user?.emailAddresses[0]?.emailAddress || "Пользователь"}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-[#8e8ea0] truncate">
                     {user?.emailAddresses[0]?.emailAddress}
                   </p>
                 </div>
@@ -321,9 +287,6 @@ export function ChatSidebar({ defaultOpen = true }: ChatSidebarProps) {
 
               <div className="mt-2">{subscriptionBadge}</div>
             </div>
-          </>
-        )}
-      </div>
 
       <RenameChatDialog
         open={renameDialogOpen}

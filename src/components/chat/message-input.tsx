@@ -20,6 +20,7 @@ import { toast } from "sonner"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { KeyboardShortcutsDialog } from "./keyboard-shortcuts-dialog"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 
 interface MessageInputProps {
   onSendMessage: (content: string, imageUrl?: string, audioFile?: File) => void
@@ -183,10 +184,16 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
 
   return (
     <div className="border-t border-[#2f2f2f] bg-[#212121]">
-      <div className="max-w-4xl mx-auto p-3 space-y-3">
+      <div className="max-w-3xl mx-auto p-3 space-y-3">
         {/* Image preview */}
         {imagePreview && (
-          <Card className="p-4 bg-card/60 border-border/40 backdrop-blur-sm transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card className="p-4 bg-[#2f2f2f] border-[#404040] backdrop-blur-sm transition-all">
             <div className="flex items-start gap-3">
               <Image
                 src={imagePreview}
@@ -208,6 +215,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               </Button>
             </div>
           </Card>
+          </motion.div>
         )}
 
         {/* Audio preview */}
@@ -251,26 +259,30 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
         {/* Input */}
         <div className="flex gap-2 items-end">
           <div className="flex-1 relative">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={handleMessageChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Сообщение Radon AI..."
-              className={cn(
-                "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-[#2f2f2f] border-[#404040] text-white placeholder:text-[#8e8ea0] focus:border-[#10a37f] focus:ring-[#10a37f] transition-colors",
-                imageFile || audioBlob ? "border-[#10a37f] focus:ring-[#10a37f]" : ""
-              )}
-              disabled={isLoading}
-            />
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={handleMessageChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Сообщение Radon AI..."
+            className={cn(
+              "min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl bg-[#2f2f2f]/80 backdrop-blur-md border-[#404040] text-white placeholder:text-[#8e8ea0] focus:border-[#10a37f] focus:ring-[#10a37f] transition-all duration-300 shadow-lg",
+              imageFile || audioBlob ? "border-[#10a37f] focus:ring-[#10a37f] shadow-[0_0_20px_rgba(16,163,127,0.3)]" : ""
+            )}
+            disabled={isLoading}
+            aria-label="Введите сообщение для Radon AI"
+            aria-describedby="message-help"
+          />
 
             <div className="absolute right-1 bottom-1 flex gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 hover:bg-[#404040] hover:text-white transition-all"
+                className="h-7 w-7 hover:bg-[#404040]/80 hover:text-white transition-all backdrop-blur-sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
+                aria-label="Прикрепить изображение"
+                title="Прикрепить изображение"
               >
                 <ImageIcon className="w-3 h-3" />
               </Button>
@@ -278,11 +290,13 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-7 w-7 transition-all",
-                  isRecording ? "text-red-400 hover:text-red-300" : "hover:text-white"
+                  "h-7 w-7 transition-all backdrop-blur-sm",
+                  isRecording ? "text-red-400 hover:text-red-300 hover:bg-red-500/20" : "hover:text-white hover:bg-[#404040]/80"
                 )}
                 onClick={handleAudioToggle}
                 disabled={isLoading}
+                aria-label={isRecording ? "Остановить запись" : "Начать запись голоса"}
+                title={isRecording ? "Остановить запись" : "Начать запись голоса"}
               >
                 {isRecording ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
               </Button>
@@ -290,7 +304,9 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShortcutsOpen(true)}
-                className="h-7 w-7 hover:text-white"
+                className="h-7 w-7 hover:text-white hover:bg-[#404040]/80 backdrop-blur-sm transition-all"
+                aria-label="Показать горячие клавиши"
+                title="Показать горячие клавиши"
               >
                 <HelpCircle className="w-3 h-3" />
               </Button>
@@ -312,9 +328,11 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
             className={cn(
               "h-11 w-11 rounded-xl transition-all shrink-0",
               canSend && !isLoading
-                ? "bg-[#10a37f] hover:bg-[#0d8f6b] text-white shadow-lg"
-                : "bg-[#2f2f2f] text-[#8e8ea0] cursor-not-allowed"
+                ? "bg-[#10a37f] hover:bg-[#0d8f6b] text-white shadow-lg hover:shadow-xl backdrop-blur-md"
+                : "bg-[#2f2f2f]/80 text-[#8e8ea0] cursor-not-allowed backdrop-blur-sm"
             )}
+            aria-label="Отправить сообщение"
+            title="Отправить сообщение (Enter)"
           >
             {isUploading ? (
               <Upload className="w-4 h-4 animate-spin" />
@@ -325,7 +343,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
         </div>
 
         {/* Footer hint */}
-        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+        <div className="flex justify-between mt-2 text-xs text-[#8e8ea0]" id="message-help">
           <span aria-live="polite">
             {imageFile
               ? "Изображение прикреплено"

@@ -32,6 +32,7 @@ import { AudioPlayer } from "./audio-player"
 import { FunctionCall, FunctionCallDisplay } from "./function-call-display"
 import { WelcomeScreen } from "./welcome-screen"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 
 interface MessageListProps {
   messages: Message[]
@@ -110,12 +111,12 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
               style={theme === "dark" ? oneDark : undefined}
               language={match[1]}
               PreTag="div"
-              className="rounded-lg border border-border/40"
+              className="rounded-lg border border-[#404040]"
             >
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
           ) : (
-            <code className="px-1 py-0.5 bg-muted/40 rounded text-sm">
+            <code className="px-1 py-0.5 bg-[#404040] rounded text-sm text-white">
               {children}
             </code>
           )
@@ -153,8 +154,11 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
             const isEditing = editingMessageId === message.id
 
             return (
-              <div
+              <motion.div
                 key={message.id}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className={cn(
                   "flex gap-3 transition-all duration-300 group",
                   isUser ? "flex-row-reverse" : "flex-row"
@@ -251,7 +255,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                       <div className="prose prose-sm max-w-none dark:prose-invert">
                         {formatMessageContent(message.content)}
                         {message.isEdited && (
-                          <div className="text-xs text-muted-foreground mt-2 italic">
+                          <div className="text-xs text-[#8e8ea0] mt-2 italic">
                             (отредактировано)
                           </div>
                         )}
@@ -280,7 +284,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteMessage(message.id)}
-                          className="h-8 px-2 text-destructive hover:text-destructive"
+                          className="h-8 px-2 text-red-400 hover:text-red-300"
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
@@ -319,7 +323,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })
         )}
@@ -332,7 +336,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <div className="bg-background/50 backdrop-blur-xl border border-border/40 rounded-2xl p-4 shadow-sm">
+              <div className="bg-[#2f2f2f]/80 backdrop-blur-xl border border-[#404040] rounded-2xl p-4 shadow-sm">
                 <LoadingIndicator text="Radon AI печатает..." />
               </div>
             </div>

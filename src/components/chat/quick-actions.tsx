@@ -87,12 +87,12 @@ export function QuickActions() {
   const mobile = quickActions.slice(0, 3)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h4 className="text-sm font-semibold text-muted-foreground mb-1">
+        <h4 className="text-sm font-semibold text-[#8e8ea0] mb-1">
           Быстрые действия
         </h4>
-        <p className="text-xs text-muted-foreground/80">
+        <p className="text-xs text-[#8e8ea0]/80">
           Выберите тип задачи, чтобы начать
         </p>
       </div>
@@ -111,19 +111,19 @@ export function QuickActions() {
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
               className={cn(
-                "cursor-pointer border border-border/40 p-3 rounded-xl transition-all",
-                "bg-background/40 backdrop-blur-md hover:bg-background/60",
-                "hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] active:scale-[0.97]"
+                "cursor-pointer border border-[#404040] p-3 rounded-xl transition-all",
+                "bg-[#2f2f2f]/80 hover:bg-[#404040]/80 backdrop-blur-md",
+                "hover:shadow-[0_0_15px_rgba(16,163,127,0.1)] active:scale-[0.97]"
               )}
             >
               <div className="flex flex-col items-center text-center">
                 <motion.div
-                  className="w-8 h-8 mb-2 flex items-center justify-center rounded-md bg-primary/10 text-primary"
+                  className="w-8 h-8 mb-2 flex items-center justify-center rounded-md bg-[#10a37f]/20 text-[#10a37f]"
                   whileHover={{ scale: 1.1 }}
                 >
                   {action.icon}
                 </motion.div>
-                <p className="text-xs font-medium">{action.title}</p>
+                <p className="text-xs font-medium text-white">{action.title}</p>
               </div>
             </Card>
           </motion.div>
@@ -144,21 +144,21 @@ export function QuickActions() {
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
               className={cn(
-                "group cursor-pointer p-4 rounded-xl border border-border/40",
-                "bg-background/40 backdrop-blur-lg transition-all duration-300",
-                "hover:bg-background/60 hover:shadow-[0_0_20px_rgba(255,255,255,0.07)] hover:-translate-y-1"
+                "group cursor-pointer p-4 rounded-xl border border-[#404040]",
+                "bg-[#2f2f2f]/80 transition-all duration-300 backdrop-blur-md",
+                "hover:bg-[#404040]/80 hover:shadow-[0_0_20px_rgba(16,163,127,0.15)] hover:-translate-y-1"
               )}
             >
               <div className="text-center">
                 <motion.div
-                  className="w-10 h-10 mx-auto mb-3 flex items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform"
+                  className="w-10 h-10 mx-auto mb-3 flex items-center justify-center rounded-lg bg-[#10a37f]/20 text-[#10a37f] transition-transform"
                   whileHover={{ scale: 1.12 }}
                   transition={{ duration: 0.25 }}
                 >
                   {action.icon}
                 </motion.div>
-                <p className="text-sm font-medium mb-1">{action.title}</p>
-                <p className="text-xs text-muted-foreground leading-snug">
+                <p className="text-sm font-medium mb-1 text-white">{action.title}</p>
+                <p className="text-xs text-[#8e8ea0] leading-snug">
                   {action.description}
                 </p>
               </div>
@@ -174,7 +174,7 @@ export function QuickActions() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 2.2 }}
       >
-        <Sparkles className="w-4 h-4 text-primary/40" />
+        <Sparkles className="w-4 h-4 text-[#10a37f]/40" />
       </motion.div>
     </div>
   )

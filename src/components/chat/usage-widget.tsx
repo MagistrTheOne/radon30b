@@ -127,21 +127,21 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
 
   if (loading) {
     return (
-      <Card className="p-4 bg-sidebar/50 backdrop-blur-sm border-sidebar-border">
+      <Card className="p-4 bg-[#2f2f2f]/50 backdrop-blur-sm border-[#404040]">
         <div className="animate-pulse">
-          <div className="h-4 bg-muted rounded mb-2"></div>
-          <div className="h-2 bg-muted rounded mb-2"></div>
-          <div className="h-3 bg-muted rounded"></div>
+          <div className="h-4 bg-[#404040] rounded mb-2"></div>
+          <div className="h-2 bg-[#404040] rounded mb-2"></div>
+          <div className="h-3 bg-[#404040] rounded"></div>
         </div>
       </Card>
     )
   }
 
   return (
-    <Card className="p-4 bg-sidebar/50 backdrop-blur-sm border-sidebar-border">
+    <Card className="p-4 bg-[#2f2f2f]/80 border-[#404040] backdrop-blur-md shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-sidebar-foreground">
+        <span className="text-sm font-medium text-white">
           Control Center
         </span>
         {getSubscriptionBadge()}
@@ -150,7 +150,7 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
       {/* Usage Progress */}
       {usageStats && (
         <div className="mb-4">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+          <div className="flex items-center justify-between text-xs text-[#8e8ea0] mb-2">
             <span>Использовано {usageStats.used} из {usageStats.limit}</span>
             <span>{usageStats.period}</span>
           </div>
@@ -158,7 +158,7 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
             value={getUsagePercentage()} 
             className="h-2 mb-2"
           />
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-[#8e8ea0]">
             {Math.round(getUsagePercentage())}% от лимита
           </div>
         </div>
@@ -167,8 +167,8 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
       {/* Motivational Message */}
       <div className="mb-4">
         <div className="flex items-start gap-2">
-          <Sparkles className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-muted-foreground italic">
+          <Sparkles className="w-3 h-3 text-[#10a37f] mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-[#8e8ea0] italic">
             {getMotivationalMessage()}
           </p>
         </div>
@@ -178,7 +178,7 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
       {subscription !== 'enterprise' && (
         <Button 
           size="sm" 
-          className="w-full text-xs"
+          className="w-full text-xs bg-[#10a37f] hover:bg-[#0d8a6b] text-white backdrop-blur-md shadow-lg hover:shadow-xl transition-all"
           variant={subscription === 'free' ? 'default' : 'outline'}
         >
           <TrendingUp className="w-3 h-3 mr-1" />
@@ -190,10 +190,10 @@ export function UsageWidget({ subscription }: UsageWidgetProps) {
       {/* Enterprise Stats */}
       {subscription === 'enterprise' && (
         <div className="text-center">
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-[#8e8ea0]">
             Безлимитный доступ
           </div>
-          <div className="text-xs text-primary font-medium">
+          <div className="text-xs text-[#10a37f] font-medium">
             Enterprise
           </div>
         </div>
