@@ -5,9 +5,10 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
-import { ImageIcon, Send, X, Upload, Mic, MicOff, Play, Square } from 'lucide-react'
+import { ImageIcon, Send, X, Upload, Mic, MicOff, Play, Square, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAudioRecorder } from '@/hooks/use-audio-recorder'
+import { KeyboardShortcutsDialog } from './keyboard-shortcuts-dialog'
 
 interface MessageInputProps {
   onSendMessage: (content: string, imageUrl?: string, audioFile?: File) => void
@@ -21,6 +22,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [audioPreview, setAudioPreview] = useState<string | null>(null)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -57,6 +59,22 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
+    }
+    
+    // Handle /help command
+    if (e.key === '/' && message === '') {
+      // Don't prevent default, let the slash be typed
+    }
+  }
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setMessage(value)
+    
+    // Check for /help command
+    if (value === '/help') {
+      setShortcutsOpen(true)
+      setMessage('')
     }
   }
 
@@ -293,10 +311,10 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
             <Textarea
               ref={textareaRef}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleMessageChange}
               onKeyDown={handleKeyDown}
               placeholder="Напишите сообщение... (Shift+Enter для новой строки)"
-              className="min-h-[60px] max-h-[200px] resize-none pr-12"
+              className="min-h-[60px] max-h-[200px] resize-none pr-16"
               disabled={isLoading}
             />
             
@@ -322,6 +340,16 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
                 ) : (
                   <Mic className="w-4 h-4" />
                 )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setShortcutsOpen(true)}
+                disabled={isLoading}
+                title="Горячие клавиши"
+              >
+                <HelpCircle className="w-4 h-4" />
               </Button>
             </div>
             
@@ -355,9 +383,15 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
              audioBlob ? 'Аудио готово к отправке' :
              'Поддерживаются изображения до 5MB и голосовые сообщения'}
           </span>
-          <span>Enter для отправки • Shift+Enter для новой строки</span>
+          <span>Enter для отправки • /help для справки</span>
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <KeyboardShortcutsDialog 
+        open={shortcutsOpen} 
+        onOpenChange={setShortcutsOpen} 
+      />
     </div>
   )
 }

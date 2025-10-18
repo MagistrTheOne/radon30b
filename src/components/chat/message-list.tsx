@@ -20,6 +20,7 @@ import { MessageHistoryDialog } from './message-history-dialog'
 import { LoadingIndicator } from '@/components/loading-states'
 import { AudioPlayer } from './audio-player'
 import { FunctionCallDisplay } from './function-call-display'
+import { WelcomeScreen } from './welcome-screen'
 
 interface MessageListProps {
   messages: Message[]
@@ -122,17 +123,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
     <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {messages.length === 0 ? (
-          <div className="flex justify-center py-12">
-            <Card className="max-w-md mx-auto p-8 text-center bg-card/50 backdrop-blur-sm border-border/50">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bot className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Добро пожаловать в Radon AI</h3>
-              <p className="text-muted-foreground">
-                Начните разговор, задав вопрос или загрузив изображение
-              </p>
-            </Card>
-          </div>
+          <WelcomeScreen />
         ) : (
           messages.map((message) => (
             <div
@@ -165,7 +156,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                   className={`inline-block p-4 rounded-2xl ${
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                      : 'bg-muted/80 backdrop-blur-sm border border-white/10 shadow-lg'
                   }`}
                 >
                   {message.imageUrl && (

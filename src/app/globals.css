@@ -567,3 +567,8 @@
     @apply overflow-y-auto sm:overflow-y-visible;
   }
 }
+
+/* Chat background gradient */
+.chat-background {
+  background: radial-gradient(circle at center, #101010, #000000 80%);
+}

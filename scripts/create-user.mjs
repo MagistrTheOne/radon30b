@@ -6,7 +6,7 @@ async function createUser() {
   try {
     // Замените на ваш реальный Clerk ID и email
     const clerkId = 'user_2your_clerk_id_here' // Нужно получить из браузера
-    const email = 'your_email@example.com' // Ваш email
+    const email = 'magistrtheone@gmail.com' // Ваш email
     
     console.log('🔍 Создаем пользователя...')
     

@@ -38,6 +38,7 @@ import { Separator } from '@/components/ui/separator'
 import { useChatContext } from '@/contexts/ChatContext'
 import { RenameChatDialog } from './rename-chat-dialog'
 import { MessageListSkeleton, LoadingIndicator } from '@/components/loading-states'
+import { UsageWidget } from './usage-widget'
 
 interface ChatSidebarProps {
   onClose?: () => void
@@ -154,12 +155,9 @@ export function ChatSidebar({ onClose }: ChatSidebarProps) {
         </Button>
       </div>
 
-      {/* Subscription Status */}
-      <div className="p-4 border-b border-sidebar-border backdrop-blur-sm bg-sidebar/50">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-sidebar-foreground">Подписка</span>
-          {getSubscriptionBadge()}
-        </div>
+      {/* Usage Widget */}
+      <div className="p-4 border-b border-sidebar-border">
+        <UsageWidget subscription={subscription} />
       </div>
 
       {/* Chat List */}

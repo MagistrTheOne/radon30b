@@ -30,7 +30,7 @@ export default function ChatPage() {
   }))
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full chat-background">
       <MessageList messages={convertedMessages} isLoading={loading} />
       <MessageInput onSendMessage={handleSendMessage} disabled={loading} />
     </div>
