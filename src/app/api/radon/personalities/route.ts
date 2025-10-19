@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 
 const RADON_API_URL = process.env.RADON_API_URL
 
@@ -9,14 +8,6 @@ if (!RADON_API_URL) {
 
 export async function GET(_request: NextRequest) {
   try {
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     // Проксируем запрос к FastAPI backend
     const response = await fetch(`${RADON_API_URL}/personalities`, {

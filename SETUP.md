@@ -5,23 +5,13 @@
 ### 1. Установка зависимостей
 
 ```bash
-# Frontend зависимости (уже установлены)
+# Frontend зависимости
 npm install
-
-# Backend зависимости
-cd backend
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
-pip install -r requirements.txt
 ```
 
 ### 2. Настройка переменных окружения
 
-Создайте файл `.env.local` в корне проекта:
+Создайте файл `.env.local` в корне проекта (скопируйте из `.env.example`):
 
 ```env
 # Clerk Authentication
@@ -29,56 +19,50 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_ваш_ключ
 CLERK_SECRET_KEY=sk_test_ваш_секрет
 CLERK_WEBHOOK_SECRET=whsec_ваш_webhook_секрет
 
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/radonai
+# Database - Neon PostgreSQL
+DATABASE_URL=postgresql://neondb_owner:npg_4crtzYWU2lqS@ep-rough-thunder-adksjh68-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Radon AI (для будущей интеграции)
-RADON_AI_API_KEY=ваш_ключ_radon_ai
-RADON_AI_API_URL=https://api.radonai.com/v1
+# Radon AI API v2.0.0 - Production Backend (Server-side only)
+RADON_API_URL=http://213.219.215.235:8000
+RADON_API_KEY=optional_if_needed
+RADON_DEFAULT_PERSONALITY=helpful
+RADON_ENABLE_FUNCTIONS=true
 ```
 
 ### 3. Настройка базы данных
 
 ```bash
-# Создайте PostgreSQL базу данных
-createdb radonai
-
-# Выполните миграции Prisma
-npx prisma migrate dev
-npx prisma generate
+# Выполните миграции Drizzle
+npm run db:push
 ```
 
 ### 4. Запуск приложения
 
 ```bash
-# Терминал 1: Backend (FastAPI)
-cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Терминал 2: Frontend (Next.js)
+# Терминал 1: Frontend (Next.js)
 npm run dev
+
+# Терминал 2: Redis (опционально для кэширования)
+docker-compose -f docker-compose.simple.yml up redis
 ```
 
 ### 5. Доступ к приложению
 
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+- **AI Backend**: http://213.219.215.235:8000 (внешний сервис)
+- **API Documentation**: http://localhost:3000/api (Next.js API routes)
 
-## 🐳 Docker (альтернативный способ)
+## 🐳 Docker (для локальной разработки)
 
 ```bash
-# Запуск всех сервисов
-docker-compose up -d
+# Запуск Redis и PostgreSQL
+docker-compose -f docker-compose.simple.yml up -d
 
 # Просмотр логов
-docker-compose logs -f
+docker-compose -f docker-compose.simple.yml logs -f
 
 # Остановка
-docker-compose down
+docker-compose -f docker-compose.simple.yml down
 ```
 
 ## 📋 Что реализовано
@@ -93,22 +77,22 @@ docker-compose down
 - [x] Responsive дизайн
 - [x] Framer Motion анимации
 
-### ✅ Backend (FastAPI)
+### ✅ Backend (Next.js API Routes)
 - [x] API endpoints для чатов и сообщений
-- [x] SQLAlchemy модели (User, Chat, Message)
-- [x] Pydantic схемы для валидации
-- [x] AI Service заглушка для Radon AI
+- [x] Drizzle ORM модели (User, Chat, Message)
+- [x] TypeScript схемы для валидации
+- [x] Интеграция с внешним AI сервисом
 - [x] Streaming ответы (SSE)
 - [x] CORS настройки
 - [x] Webhook обработка Clerk
 
-### ✅ Database (PostgreSQL + Prisma)
-- [x] Prisma schema
+### ✅ Database (PostgreSQL + Drizzle)
+- [x] Drizzle schema
 - [x] Миграции
 - [x] Связи между таблицами
 
 ### ✅ DevOps
-- [x] Docker конфигурация
+- [x] Docker конфигурация (упрощенная)
 - [x] Environment переменные
 - [x] README с документацией
 
@@ -121,11 +105,10 @@ docker-compose down
 
 ## 🎯 Следующие шаги
 
-1. **Интеграция с Radon AI API** - замените заглушку в `backend/app/services/ai_service.py`
-2. **Настройка PostgreSQL** - создайте production базу данных
-3. **Деплой на Vercel** - для frontend
-4. **Деплой на Railway/Render** - для backend
-5. **Настройка домена** - для production
+1. **Настройка PostgreSQL** - используйте Neon (уже настроено)
+2. **Деплой на Vercel** - для frontend
+3. **Настройка домена** - для production
+4. **Мониторинг AI Backend** - проверка доступности внешнего сервиса
 
 ## 🐛 Решение проблем
 
@@ -139,11 +122,10 @@ npm install
 ### Ошибка базы данных
 ```bash
 # Проверьте подключение к PostgreSQL
-psql -h localhost -U user -d radonai
+psql $DATABASE_URL
 
 # Выполните миграции заново
-npx prisma migrate reset
-npx prisma migrate dev
+npm run db:push
 ```
 
 ### Ошибка Clerk
@@ -155,7 +137,7 @@ npx prisma migrate dev
 При возникновении проблем:
 1. Проверьте логи в терминале
 2. Убедитесь, что все переменные окружения настроены
-3. Проверьте, что PostgreSQL запущен
+3. Проверьте, что PostgreSQL доступен
 4. Обратитесь к документации Clerk и Next.js
 
 ---

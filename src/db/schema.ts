@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm'
 
 // Users table
 export const users = pgTable('User', {
-  id: text('id').primaryKey(),
+  id: text('id').primaryKey().default('cuid()'),
   clerkId: text('clerkId').notNull().unique(),
   email: text('email').notNull().unique(),
   name: text('name'),

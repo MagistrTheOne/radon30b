@@ -1,10 +1,11 @@
 "use client"
 
 import { forwardRef } from "react"
-import { Button, ButtonProps } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
+import { ButtonHTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
 
-interface AccessibleButtonProps extends ButtonProps {
+interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Описание для screen readers */
   ariaDescription?: string
   /** Показывать ли focus ring */

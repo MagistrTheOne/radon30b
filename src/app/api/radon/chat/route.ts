@@ -36,11 +36,12 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         prompt,
-        max_new_tokens: max_new_tokens || 512,
-        temperature: temperature || 0.7,
+        max_new_tokens: max_new_tokens || 8000,
+        temperature: temperature || 1.9,
+        do_sample: true,
         personality: personality || 'helpful',
         enable_functions: enable_functions || false,
-        conversation_id,
+        conversation_id: conversation_id || Date.now(),
         user_id: userId || 'test_user'
       })
     })

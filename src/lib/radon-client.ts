@@ -8,10 +8,7 @@
 export interface RadonAPIOptions {
   max_new_tokens?: number
   temperature?: number
-  stream?: boolean
-  imageUrl?: string
-  audioUrl?: string
-  // Новые параметры API v2.0.0
+  do_sample?: boolean
   enable_functions?: boolean
   personality?: 'helpful' | 'creative' | 'technical'
   conversation_id?: string
@@ -21,14 +18,9 @@ export interface RadonAPIOptions {
 export interface RadonAPIResponse {
   response: string
   tokens_used?: number
+  processing_time?: number
+  personality?: string
   error?: string
-  // Новые поля API v2.0.0
-  conversation_id?: string
-  function_calls?: Array<{
-    name: string
-    arguments: Record<string, unknown>
-  }>
-  personality_used?: string
 }
 
 export interface RadonStreamChunk {
@@ -52,12 +44,9 @@ export async function callRadonAPI(
   options: RadonAPIOptions = {}
 ): Promise<RadonAPIResponse> {
   const {
-    max_new_tokens = 512,
-    temperature = 0.7,
-    stream = false,
-    imageUrl,
-    audioUrl,
-    // Новые параметры API v2.0.0
+    max_new_tokens = 8000,
+    temperature = 1.9,
+    do_sample = true,
     enable_functions = false,
     personality = 'helpful',
     conversation_id,
@@ -68,73 +57,31 @@ export async function callRadonAPI(
   const radonApiUrl = '/api/radon'
   
   try {
-    // Если есть мультимодальные данные, используем FormData
-    if (imageUrl || audioUrl) {
-      const formData = new FormData()
-      formData.append('prompt', prompt)
-      formData.append('max_new_tokens', max_new_tokens.toString())
-      formData.append('temperature', temperature.toString())
-      formData.append('stream', stream.toString())
-      // Новые параметры API v2.0.0
-      formData.append('enable_functions', enable_functions.toString())
-      formData.append('personality', personality)
-      if (conversation_id) formData.append('conversation_id', conversation_id)
-      if (user_id) formData.append('user_id', user_id)
-      
-      if (imageUrl) {
-        // Загружаем изображение по URL
-        const imageResponse = await fetch(imageUrl)
-        const imageBlob = await imageResponse.blob()
-        formData.append('image', imageBlob, 'image.jpg')
-      }
-      
-      if (audioUrl) {
-        // Загружаем аудио по URL
-        const audioResponse = await fetch(audioUrl)
-        const audioBlob = await audioResponse.blob()
-        formData.append('audio', audioBlob, 'audio.webm')
-      }
-
-      const response = await fetch(`${radonApiUrl}/chat`, {
-        method: 'POST',
-        body: formData
+    // JSON запрос для текстовых сообщений
+    const response = await fetch(`${radonApiUrl}/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        max_new_tokens,
+        temperature,
+        do_sample,
+        enable_functions,
+        personality,
+        conversation_id,
+        user_id
       })
+    })
 
-      if (!response.ok) {
-        throw new Error(`Radon API error: ${response.status} ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      
-      return parseRadonResponse(data)
-    } else {
-      // Обычный JSON запрос для текстовых сообщений
-      const response = await fetch(`${radonApiUrl}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          max_new_tokens,
-          temperature,
-          stream,
-          // Новые параметры API v2.0.0
-          enable_functions,
-          personality,
-          conversation_id,
-          user_id
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Radon API error: ${response.status} ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      
-      return parseRadonResponse(data)
+    if (!response.ok) {
+      throw new Error(`Radon API error: ${response.status} ${response.statusText}`)
     }
+
+    const data = await response.json()
+    
+    return parseRadonResponse(data)
 
   } catch (error) {
     console.error('Radon API call failed:', error)
@@ -165,10 +112,8 @@ function parseRadonResponse(data: unknown): RadonAPIResponse {
     return {
       response: String(responseData.response),
       tokens_used: typeof responseData.tokens_used === 'number' ? responseData.tokens_used : undefined,
-      // Новые поля API v2.0.0
-      conversation_id: typeof responseData.conversation_id === 'string' ? responseData.conversation_id : undefined,
-      function_calls: Array.isArray(responseData.function_calls) ? responseData.function_calls as Array<{name: string; arguments: Record<string, unknown>}> : undefined,
-      personality_used: typeof responseData.personality_used === 'string' ? responseData.personality_used : undefined
+      processing_time: typeof responseData.processing_time === 'number' ? responseData.processing_time : undefined,
+      personality: typeof responseData.personality === 'string' ? responseData.personality : undefined
     }
   }
 
@@ -177,10 +122,8 @@ function parseRadonResponse(data: unknown): RadonAPIResponse {
     return {
       response: String(responseData.text),
       tokens_used: typeof responseData.tokens_used === 'number' ? responseData.tokens_used : undefined,
-      // Новые поля API v2.0.0
-      conversation_id: typeof responseData.conversation_id === 'string' ? responseData.conversation_id : undefined,
-      function_calls: Array.isArray(responseData.function_calls) ? responseData.function_calls as Array<{name: string; arguments: Record<string, unknown>}> : undefined,
-      personality_used: typeof responseData.personality_used === 'string' ? responseData.personality_used : undefined
+      processing_time: typeof responseData.processing_time === 'number' ? responseData.processing_time : undefined,
+      personality: typeof responseData.personality === 'string' ? responseData.personality : undefined
     }
   }
 
@@ -188,10 +131,8 @@ function parseRadonResponse(data: unknown): RadonAPIResponse {
     return {
       response: String(responseData.content),
       tokens_used: typeof responseData.tokens_used === 'number' ? responseData.tokens_used : undefined,
-      // Новые поля API v2.0.0
-      conversation_id: typeof responseData.conversation_id === 'string' ? responseData.conversation_id : undefined,
-      function_calls: Array.isArray(responseData.function_calls) ? responseData.function_calls as Array<{name: string; arguments: Record<string, unknown>}> : undefined,
-      personality_used: typeof responseData.personality_used === 'string' ? responseData.personality_used : undefined
+      processing_time: typeof responseData.processing_time === 'number' ? responseData.processing_time : undefined,
+      personality: typeof responseData.personality === 'string' ? responseData.personality : undefined
     }
   }
 

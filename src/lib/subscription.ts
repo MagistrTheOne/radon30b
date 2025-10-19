@@ -3,6 +3,8 @@
  * Реальная реализация управления подписками
  */
 
+import { SUBSCRIPTION_CONFIG } from '@/config'
+
 export interface Subscription {
   id: string
   userId: string
@@ -54,36 +56,7 @@ export interface SubscriptionLimits {
   }
 }
 
-export const SUBSCRIPTION_LIMITS: SubscriptionLimits = {
-  free: {
-    messagesPerMonth: 100,
-    tokensPerMonth: 10000,
-    maxFileSize: 5 * 1024 * 1024, // 5MB
-    maxFilesPerMessage: 1,
-    features: ['basic_chat', 'image_upload']
-  },
-  pro: {
-    messagesPerMonth: 1000,
-    tokensPerMonth: 100000,
-    maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxFilesPerMessage: 3,
-    features: ['basic_chat', 'image_upload', 'audio_upload', 'function_calling', 'personalities']
-  },
-  team: {
-    messagesPerMonth: 5000,
-    tokensPerMonth: 500000,
-    maxFileSize: 25 * 1024 * 1024, // 25MB
-    maxFilesPerMessage: 5,
-    features: ['basic_chat', 'image_upload', 'audio_upload', 'function_calling', 'personalities', 'team_collaboration', 'priority_support']
-  },
-  enterprise: {
-    messagesPerMonth: -1, // unlimited
-    tokensPerMonth: -1, // unlimited
-    maxFileSize: 100 * 1024 * 1024, // 100MB
-    maxFilesPerMessage: 10,
-    features: ['basic_chat', 'image_upload', 'audio_upload', 'function_calling', 'personalities', 'team_collaboration', 'priority_support', 'custom_integrations', 'dedicated_support']
-  }
-}
+export const SUBSCRIPTION_LIMITS = SUBSCRIPTION_CONFIG.limits
 
 /**
  * Получить подписку пользователя

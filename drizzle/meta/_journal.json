@@ -15,6 +15,20 @@
       "when": 1760817821177,
       "tag": "0001_warm_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760824418652,
+      "tag": "0002_true_skreet",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760824529481,
+      "tag": "0003_aberrant_landau",
+      "breakpoints": true
     }
   ]
 }

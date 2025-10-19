@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Redis for caching and pub/sub
+  redis:
+    image: redis:alpine
+    container_name: radonai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database (optional - can use Neon instead)
+  postgres:
+    image: postgres:15-alpine
+    container_name: radonai-postgres
+    environment:
+      POSTGRES_DB: radonai
+      POSTGRES_USER: radonai
+      POSTGRES_PASSWORD: radonai_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radonai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

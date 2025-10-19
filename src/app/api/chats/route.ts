@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
+import { db, users, chats, subscriptions } from '@/db'
+import { eq } from 'drizzle-orm'
 
 /**
  * GET /api/chats - получить список чатов текущего пользователя
@@ -19,8 +20,8 @@ export async function GET(_request: NextRequest) {
     // Найти пользователя в БД по Clerk ID
     let user
     try {
-      user = await prisma.user.findUnique({
-        where: { clerkId: userId }
+      user = await db.query.users.findFirst({
+        where: eq(users.clerkId, userId)
       })
     } catch (dbError) {
       console.error('❌ Ошибка подключения к базе данных:', dbError)
@@ -44,20 +45,17 @@ export async function GET(_request: NextRequest) {
           ? `${clerkUser.firstName} ${clerkUser.lastName}`
           : clerkUser?.firstName || 'Пользователь'
 
-        const newUser = await prisma.user.create({
-          data: {
-            clerkId: userId,
-            email: userEmail,
-            name: userName,
-            role: 'user',
-            subscriptionData: {
-              create: {
-                tier: 'free',
-                requestsUsed: 0,
-                requestsLimit: 10
-              }
-            }
-          }
+        const [newUser] = await db.insert(users).values({
+          clerkId: userId,
+          email: userEmail,
+          name: userName,
+        }).returning()
+
+        // Создаем подписку
+        await db.insert(subscriptions).values({
+          userId: newUser.id,
+          tier: 'free',
+          status: 'active'
         })
         console.log(`✅ Пользователь создан: ${newUser.id} (${userEmail})`)
         // Обновляем переменную user для дальнейшего использования
@@ -75,22 +73,24 @@ export async function GET(_request: NextRequest) {
     }
 
     // Получить чаты пользователя с подсчетом сообщений
-    const chats = await prisma.chat.findMany({
-      where: { userId: user!.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { messages: true }
+    const userChats = await db.query.chats.findMany({
+      where: eq(chats.userId, user!.id),
+      orderBy: (chats, { desc }) => [desc(chats.createdAt)],
+      with: {
+        messages: {
+          columns: {
+            id: true,
+          }
         }
       }
     })
 
     // Преобразовать в формат, ожидаемый фронтендом
-    const formattedChats = chats.map((chat: { id: string; title: string; createdAt: Date; _count: { messages: number } }) => ({
+    const formattedChats = userChats.map((chat) => ({
       id: chat.id,
       title: chat.title,
       createdAt: chat.createdAt.toISOString(),
-      messageCount: chat._count.messages
+      messageCount: chat.messages?.length || 0
     }))
 
     return NextResponse.json(formattedChats)
@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
     // Найти пользователя в БД по Clerk ID
     let user
     try {
-      user = await prisma.user.findUnique({
-        where: { clerkId: userId }
+      user = await db.query.users.findFirst({
+        where: eq(users.clerkId, userId)
       })
     } catch (dbError) {
       console.error('❌ Ошибка подключения к базе данных:', dbError)
@@ -156,20 +156,17 @@ export async function POST(request: NextRequest) {
           ? `${clerkUser.firstName} ${clerkUser.lastName}`
           : clerkUser?.firstName || 'Пользователь'
 
-        const newUser = await prisma.user.create({
-          data: {
-            clerkId: userId,
-            email: userEmail,
-            name: userName,
-            role: 'user',
-            subscriptionData: {
-              create: {
-                tier: 'free',
-                requestsUsed: 0,
-                requestsLimit: 10
-              }
-            }
-          }
+        const [newUser] = await db.insert(users).values({
+          clerkId: userId,
+          email: userEmail,
+          name: userName,
+        }).returning()
+
+        // Создаем подписку
+        await db.insert(subscriptions).values({
+          userId: newUser.id,
+          tier: 'free',
+          status: 'active'
         })
         console.log(`✅ Пользователь создан: ${newUser.id} (${userEmail})`)
         // Обновляем переменную user для дальнейшего использования
@@ -187,12 +184,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Создать новый чат
-    const chat = await prisma.chat.create({
-      data: {
-        userId: user!.id,
-        title: title.trim()
-      }
-    })
+    const [chat] = await db.insert(chats).values({
+      userId: user!.id,
+      title: title.trim()
+    }).returning()
 
     // Вернуть в формате, ожидаемом фронтендом
     const formattedChat = {

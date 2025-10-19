@@ -71,5 +71,5 @@ export function handleAPIError(error: unknown, defaultMessage = 'Internal server
 }
 
 export function isAPIError(obj: unknown): obj is APIError {
-  return obj && typeof obj === 'object' && 'error' in obj && 'status' in obj
+  return Boolean(obj && typeof obj === 'object' && 'error' in obj && 'status' in obj)
 }

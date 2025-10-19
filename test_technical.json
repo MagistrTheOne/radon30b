@@ -1,0 +1,7 @@
+{
+  "prompt": "Объясни как работает машинное обучение простыми словами",
+  "max_new_tokens": 300,
+  "temperature": 1.9,
+  "do_sample": true,
+  "personality": "technical"
+}
